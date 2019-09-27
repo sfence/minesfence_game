@@ -344,6 +344,22 @@ minetest.register_craftitem("default:flint", {
 	inventory_image = "default_flint.png"
 })
 
+minetest.register_craftitem("default:stone_soft", {
+	description = S("Soft stone"),
+	inventory_image = "default_stone_soft.png",
+})
+
+minetest.register_craftitem("default:stone_hard", {
+	description = S("Hard stone"),
+	inventory_image = "default_stone_hard.png",
+	groups = {rough_chip_tool = 1},
+})
+
+minetest.register_craftitem("default:stone_flat", {
+	description = S("Flat stone"),
+	inventory_image = "default_stone_flat_big.png"
+})
+
 minetest.register_craftitem("default:blueberries", {
 	description = S("Blueberries"),
 	inventory_image = "default_blueberries.png",

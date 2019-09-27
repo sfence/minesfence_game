@@ -563,6 +563,16 @@ minetest.register_node("default:sand", {
 	tiles = {"default_sand.png"},
 	groups = {crumbly = 3, falling_node = 1, sand = 1},
 	sounds = default.node_sound_sand_defaults(),
+	drop = {
+		max_items = 2,
+		items = {
+			{items = {"default:flint"}, rarity = 1024},
+			{items = {"default:stone_soft"}, rarity = 768},
+			{items = {"default:stone_hard"}, rarity = 635},
+			{items = {"default:stone_flat"}, rarity = 154},
+			{items = {"default:sand"}}
+		}
+	}
 })
 
 minetest.register_node("default:desert_sand", {
@@ -570,6 +580,16 @@ minetest.register_node("default:desert_sand", {
 	tiles = {"default_desert_sand.png"},
 	groups = {crumbly = 3, falling_node = 1, sand = 1},
 	sounds = default.node_sound_sand_defaults(),
+	drop = {
+		max_items = 2,
+		items = {
+			{items = {"default:flint"}, rarity = 1024},
+			{items = {"default:stone_soft"}, rarity = 768},
+			{items = {"default:stone_hard"}, rarity = 635},
+			{items = {"default:stone_flat"}, rarity = 154},
+			{items = {"default:desert_sand"}}
+		}
+	}
 })
 
 minetest.register_node("default:silver_sand", {
@@ -577,6 +597,16 @@ minetest.register_node("default:silver_sand", {
 	tiles = {"default_silver_sand.png"},
 	groups = {crumbly = 3, falling_node = 1, sand = 1},
 	sounds = default.node_sound_sand_defaults(),
+	drop = {
+		max_items = 2,
+		items = {
+			{items = {"default:flint"}, rarity = 1024},
+			{items = {"default:stone_soft"}, rarity = 768},
+			{items = {"default:stone_hard"}, rarity = 635},
+			{items = {"default:stone_flat"}, rarity = 154},
+			{items = {"default:silver_sand"}}
+		}
+	}
 })
 
 
@@ -586,9 +616,12 @@ minetest.register_node("default:gravel", {
 	groups = {crumbly = 2, falling_node = 1},
 	sounds = default.node_sound_gravel_defaults(),
 	drop = {
-		max_items = 1,
+		max_items = 2,
 		items = {
-			{items = {"default:flint"}, rarity = 16},
+			{items = {"default:flint"}, rarity = 128},
+			{items = {"default:stone_soft"}, rarity = 64},
+			{items = {"default:stone_hard"}, rarity = 32},
+			{items = {"default:stone_flat"}, rarity = 256},
 			{items = {"default:gravel"}}
 		}
 	}
@@ -679,7 +712,7 @@ minetest.register_node("default:tree", {
 	tiles = {"default_tree_top.png", "default_tree_top.png", "default_tree.png"},
 	paramtype2 = "facedir",
 	is_ground_content = false,
-	groups = {tree = 1, choppy = 2, oddly_breakable_by_hand = 1, flammable = 2},
+	groups = {tree = 1, choppy = 2, flammable = 2},
 	sounds = default.node_sound_wood_defaults(),
 
 	on_place = minetest.rotate_node
@@ -691,7 +724,7 @@ minetest.register_node("default:wood", {
 	place_param2 = 0,
 	tiles = {"default_wood.png"},
 	is_ground_content = false,
-	groups = {choppy = 2, oddly_breakable_by_hand = 2, flammable = 2, wood = 1},
+	groups = {choppy = 2, flammable = 2, wood = 1},
 	sounds = default.node_sound_wood_defaults(),
 })
 
@@ -819,7 +852,7 @@ minetest.register_node("default:jungletree", {
 		"default_jungletree.png"},
 	paramtype2 = "facedir",
 	is_ground_content = false,
-	groups = {tree = 1, choppy = 2, oddly_breakable_by_hand = 1, flammable = 2},
+	groups = {tree = 1, choppy = 2, flammable = 2},
 	sounds = default.node_sound_wood_defaults(),
 
 	on_place = minetest.rotate_node
@@ -934,7 +967,7 @@ minetest.register_node("default:pine_tree", {
 		"default_pine_tree.png"},
 	paramtype2 = "facedir",
 	is_ground_content = false,
-	groups = {tree = 1, choppy = 3, oddly_breakable_by_hand = 1, flammable = 3},
+	groups = {tree = 1, choppy = 3, flammable = 3},
 	sounds = default.node_sound_wood_defaults(),
 
 	on_place = minetest.rotate_node
@@ -1013,7 +1046,7 @@ minetest.register_node("default:acacia_tree", {
 		"default_acacia_tree.png"},
 	paramtype2 = "facedir",
 	is_ground_content = false,
-	groups = {tree = 1, choppy = 2, oddly_breakable_by_hand = 1, flammable = 2},
+	groups = {tree = 1, choppy = 2, flammable = 2},
 	sounds = default.node_sound_wood_defaults(),
 
 	on_place = minetest.rotate_node
@@ -1092,7 +1125,7 @@ minetest.register_node("default:aspen_tree", {
 		"default_aspen_tree.png"},
 	paramtype2 = "facedir",
 	is_ground_content = false,
-	groups = {tree = 1, choppy = 3, oddly_breakable_by_hand = 1, flammable = 3},
+	groups = {tree = 1, choppy = 3, flammable = 3},
 	sounds = default.node_sound_wood_defaults(),
 
 	on_place = minetest.rotate_node
