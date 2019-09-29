@@ -10,9 +10,10 @@ if minetest.get_modpath("intllib") and intllib then
 end
 
 -- Load files
-local default_path = minetest.get_modpath("recipes")
+local recipes_path = minetest.get_modpath("recipes")
 
-dofile(default_path.."/recipes.lua")
+dofile(recipes_path.."/recipes.lua")
+dofile(recipes_path.."/work.lua")
 
 
 recipes.S = nil

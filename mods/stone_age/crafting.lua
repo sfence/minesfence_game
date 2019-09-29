@@ -21,14 +21,16 @@ minetest.register_craft({
 recipes.register_recipe({
   name = S("Hand axe"),
   category = "rough_stone_crafts",
-  manual = {rough_chip_tool = 10},
+  manual = {{rough_chip_tool = 10}},
+  tool_in_order = false,
   output = {"stone_age:hand_axe"},
   input = {{"default:flint"}},
 })
 recipes.register_recipe({
   name = S("Hand axe"),
   category = "rough_stone_crafts",
-  manual = {rough_chip_tool = 40},
+  manual = {{rough_chip_tool = 40}},
+  tool_in_order = false,
   output = {"stone_age:hand_axe"},
   input = {{"default:stone_soft"}},
 })

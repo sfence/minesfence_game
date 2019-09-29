@@ -3,8 +3,9 @@ local S = recipes.S;
 
 -- Recipe
 -- name -> name of recipe
--- categoty -> category name string, used by machines to select only aviable recepts
--- manual -> key-value list of operations which have to be done and how are they exhausting/laborous, key name is used to check instument group, higger group mean quicker work
+-- category -> category name string, used by machines to select only aviable recepts
+-- manual -> list of tables with one key and one value, where key mean work_name and key value mean, work_points. Work_name specify tool group which have to be used to work, higger group mean quicker work, work_point specify number of work which have to be done
+-- tool_in_order -> true if tool have to be used in order of manual definition, false when the usage in order is not required
 -- input -> recipe inputs, list of list
 -- output -> recipe outouts list
 
@@ -21,6 +22,10 @@ function recipes.register_recipe(recipe_data)
   end
   if (recipe_data.manual == nil) then
     minetest.log("error", "[Recipes] ignore to register recipe without manual.")
+    return
+  end
+  if (recipe_data.tool_in_order == nil) then
+    minetest.log("error", "[Recipes] ignore to register recipe without tool_in_order specification.")
     return
   end
   if (recipe_data.output == nil) then
@@ -129,8 +134,8 @@ end
 function recipes.find_recipe(search_data, outputs_limit) 
   local found_recipes = {};
   
-  if (search_data.category == nil) then
-    minetest.log("error", "[Recipes] ignore to search recipe without category.")
+  if (search_data.categories == nil) then
+    minetest.log("error", "[Recipes] ignore to search recipe without categories.")
     return found_recipes;
   end
   if (search_data.input == nil) then
@@ -140,11 +145,11 @@ function recipes.find_recipe(search_data, outputs_limit)
   
   local search_inputs = optimalize_inventory_input(search_data.input);  
   
-  for keyA, category in pairs(search_data.category) do
+  for keyA, category in pairs(search_data.categories) do
     local category_recipes = recipes.recipes[category];
     for keyB, recipe in pairs(category_recipes) do
       if ((outputs_limit==0) or (#recipe.output <= outputs_limit)) then
-        minetest.log("warning", "Compare with recipe: "..recipe.category)
+        -- minetest.log("warning", "Compare with recipe: "..recipe.category)
         if (compare_recipe_input(search_inputs, recipe.input)==true) then
           table.insert(found_recipes, recipe)
         end
@@ -183,6 +188,14 @@ function recipes.inventory_to_table(inventory, list_name)
   return inventory_table;
 end
 
+function recipes.reduce_input_inventory(inventory_table)
+  for row_index, row_data in pairs(inventory_table) do
+    for column_index, item in pairs(row_data) do
+      local item_count = item:get_count();
+      item:set_count(item_count-1);
+    end
+  end
+end
 function recipes.inventory_from_table(inventory, list_name, inventory_table)
   local inventory_size = inventory:get_size(list_name);
   local inventory_width = inventory:get_width(list_name);
@@ -212,9 +225,15 @@ function recipes.inventory_from_list(inventory, list_name, inventory_list)
     local item = inventory_list[item_index];
     
     if (item ~= nil) then
-      inventory:set_stack(list_name, item_index, item);
+      local can_be_added = inventory:room_for_item(list_name, item);
+      if (can_be_added==true) then
+        inventory:add_item(list_name, item);
+        return true;
+      end
     end
   end
+  
+  return false;
 end
 
 function recipes.create_inventory_from_output(output)
@@ -239,5 +258,59 @@ function recipes.create_inventory_from_output(output)
   end
   
   return inventory_list;
+end
+
+function recipes.get_tool_use(recipe, wielded_name, progress_list)
+  local use_tool = {tool_power = 0, progress_index = 0};
+  
+  if (recipe.tool_in_order==true) then
+    for index, work_table in pairs(recipe.manual) do
+      if (progress_list[index]>0) then
+        local work_name, work_points = next(work_table, nil);
+        use_tool.tool_power  = minetest.get_item_group(wielded_name, work_name);
+        use_tool.progress_index = index;
+        return use_tool;
+      end
+    end
+  else
+    for index, work_table in pairs(recipe.manual) do
+      if (progress_list[index]>0) then
+        local work_name, work_points = next(work_table, nil);
+        local tool_power  = minetest.get_item_group(wielded_name, work_name);
+        if (tool_power>0) then
+          use_tool.tool_power = tool_power;
+          use_tool.progress_index = index;
+          return use_tool;
+        end
+      end
+    end
+  end
+  
+  return use_tool;
+end
+
+-- zero sum mean work is finished
+function recipes.progress_sum(progress)
+  local progress_sum = 0;
+  
+  for index, work_points in pairs(progress) do
+    if (work_points>0) then
+      progress_sum = progress_sum + work_points;
+    end
+  end
+  
+  return progress_sum;
+end
+
+function recipes.create_progress_list(recipe)
+  local progress_list = {};
+  
+  for index, work_table in pairs(recipe.manual) do
+    local work_name, work_points = next(work_table, nil);
+    
+    table.insert(progress_list, work_points);
+  end
+  
+  return progress_list;
 end
 

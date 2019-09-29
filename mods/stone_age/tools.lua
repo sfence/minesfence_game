@@ -19,6 +19,6 @@ minetest.register_tool("stone_age:hand_axe", {
 		damage_groups = {fleshy=2},
 	},
 	sound = {breaks = "default_tool_breaks"},
-	groups = {axe = 1}
+	groups = {axe = 1, disable_repair = 1}
 })
 

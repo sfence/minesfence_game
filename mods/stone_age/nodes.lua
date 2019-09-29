@@ -61,65 +61,12 @@ minetest.register_node("stone_age:flat_stone_desk",{
     end,
     
   on_punch = function(pos, node, puncher)
-      minetest.log("warning", "Stone desk punched by something.")
-      if ( not(pos) or not(node) or not(puncher)) then
-        return true;
-      end
-      
-      local wielded = puncher:get_wielded_item();
-      if (not(wielded) or not(wielded:get_name()) ) then
-        return true;
-      end
-      local wielded_name = wielded:get_name();
-        
-      minetest.log("warning", "Punched by "..wielded_name..".")
-      
-      local rough_chip_tool  = minetest.get_item_group(wielded_name, "rough_chip_tool");
-      local precise_chip_tool  = minetest.get_item_group(wielded_name, "precise_chip_tool");
-      
-      if (rough_chip_tool > 0) then
-        minetest.log("warning", "Punched by rough_chip_tool.")
-        -- do something
-        local meta = minetest.get_meta(pos);
-        local inventory = meta:get_inventory();
-        local input_table = recipes.inventory_to_table(inventory, "input");
-        
-        local search_recipe = {category = {"rough_stone_crafts"}, input = input_table};
-        
-        minetest.log("warning", "Look for recipe:"..search_recipe.category[1])
-        
-        local found = recipes.find_recipe(search_recipe, 1);
-        
-        minetest.log("warning", "Found:"..#found.." id: "..tostring(found[1]))
-        
-        if (#found>1) then
-          minetest.log("error", "Found more then one recipe.")
-        end
-        
-        local progress = meta:get_string("progress");
-        progress = tonumber(progress) + rough_chip_tool;
-        meta:set_string("progress", tostring(progress));
-        
-        minetest.log("warning", "State "..progress.."/"..found[1].manual["rough_chip_tool"])
-        
-        if (progress>=found[1].manual["rough_chip_tool"]) then
-          local output_list = recipes.create_inventory_from_output(found[1].output);
-          recipes.inventory_from_list(inventory, "output", output_list);
-          
-          minetest.log("warning", "Done.")
-          meta:set_string("progress", 0);
-          meta:set_string("last_recipe", 0);
-        end
-        
-      elseif (precise_chip_tool > 0) then
-        minetest.log("warning", "Punched by precise_chip_tool.")
-        -- do something
-      else
-        minetest.log("warning", "Punched by other tool.")
-        return true;
-      end
-      
-      return false;
+      local settings = {
+          input_list = "input",
+          output_list = "output",
+          recipe_categories = {"rough_stone_crafts"},
+        };
+      return recipes.work_on_push(pos, node, puncher, settings);
     end,
 })
 
