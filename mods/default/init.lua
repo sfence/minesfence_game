@@ -39,6 +39,9 @@ default.gui_survival_form = "size[8,8.5]"..
 			"listring[current_player;craft]"..
 			default.get_hotbar_bg(0,4.25)
 
+-- Random generator
+default.random_generator = PcgRandom(os.time());
+
 -- Load files
 local default_path = minetest.get_modpath("default")
 
@@ -55,3 +58,5 @@ dofile(default_path.."/crafting.lua")
 dofile(default_path.."/mapgen.lua")
 dofile(default_path.."/aliases.lua")
 dofile(default_path.."/legacy.lua")
+
+dofile(default_path.."/firmness.lua")
