@@ -12,17 +12,33 @@ minetest.register_node("test:firmness", {
 	drop = "test:firmness",
 	legacy_mineral = true,
 	sounds = default.node_sound_stone_defaults(),
+  
+  after_destruct = default.firmness_after_destruct,
+  preserve_metadata = default.firmness_preserve_metadata;
+})
+
+minetest.register_node("test:firmness_stable", {
+	description = S("Firmness test stable"),
+	tiles = {"test_node.png"},
+	groups = {cracky = 1, oddly_breakable_by_hand = 1, not_in_creative_inventory=1},
+	drop = "test:firmness",
+	legacy_mineral = true,
+	sounds = default.node_sound_stone_defaults(),
+  
+  after_destruct = default.firmness_after_destruct,
 })
 
 minetest.register_node("test:firmness_falling", {
 	description = S("Firmness test falling"),
 	tiles = {"test_node.png"},
-	groups = {cracky = 1, oddly_breakable_by_hand = 1, firmness = 2, resilience = 3, falling_node=1, not_in_creative_inventory=1},
+	groups = {cracky = 1, oddly_breakable_by_hand = 1, falling_node=1, not_in_creative_inventory=1},
 	drowning = 1,
 	drop = "test:firmness",
 	legacy_mineral = true,
 	sounds = default.node_sound_stone_defaults(),
 })
+
+default.register_firmness_node_change("test:firmness", "test:firmness_falling", "test:firmness_stable");
 
 minetest.register_abm({
 	label = "Test firmness",
@@ -32,15 +48,8 @@ minetest.register_abm({
 	},
 	--interval = 61,
 	interval = 11,
-	chance = 1,
+	chance = 6,
 	catch_up = false,
-	action = function(pos, node)
-      local fall_it = default.is_should_fall(pos, node);
-      --minetest.log("warning", "Node on pos "..dump(pos).." fall it is "..tostring(fall_it));
-      if (fall_it==true) then
-        minetest.set_node(pos,{name=node.name.."_falling"} )
-        --minetest.spawn_falling_node(pos);
-        minetest.check_for_falling(pos);
-      end
-    end,
-  });
+  action = default.firmness_abm_action,
+});
+
