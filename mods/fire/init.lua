@@ -63,7 +63,7 @@ minetest.register_node("fire:basic_flame", {
 	sunlight_propagates = true,
 	floodable = true,
 	damage_per_second = 4,
-	groups = {igniter = 2, dig_immediate = 3, not_in_creative_inventory = 1},
+	groups = {igniter = 2, not_in_creative_inventory = 1},
 	drop = "",
 
 	on_timer = function(pos)
@@ -109,7 +109,7 @@ minetest.register_node("fire:permanent_flame", {
 	sunlight_propagates = true,
 	floodable = true,
 	damage_per_second = 4,
-	groups = {igniter = 2, dig_immediate = 3},
+	groups = {igniter = 2},
 	drop = "",
 
 	on_flood = flood_flame,

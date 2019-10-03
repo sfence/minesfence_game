@@ -1239,6 +1239,13 @@ minetest.register_node("default:stone_with_iron", {
 	drop = "default:iron_lump",
 	sounds = default.node_sound_stone_defaults(),
 })
+minetest.register_node("default:gravel_with_iron", {
+	description = S("Iron Ore"),
+	tiles = {"default_gravel.png^default_mineral_iron.png"},
+	groups = {crumbly = 2, falling_node = 1},
+	drop = "default:iron_lump",
+	sounds = default.node_sound_gravel_defaults(),
+})
 
 minetest.register_node("default:steelblock", {
 	description = S("Steel Block"),
@@ -1256,6 +1263,13 @@ minetest.register_node("default:stone_with_copper", {
 	drop = "default:copper_lump",
 	sounds = default.node_sound_stone_defaults(),
 })
+minetest.register_node("default:gravel_with_copper", {
+	description = S("Copper Ore"),
+	tiles = {"default_gravel.png^default_mineral_copper.png"},
+	groups = {crumbly = 2, falling_node = 1},
+	drop = "default:copper_lump",
+	sounds = default.node_sound_gravel_defaults(),
+})
 
 minetest.register_node("default:copperblock", {
 	description = S("Copper Block"),
@@ -1272,6 +1286,13 @@ minetest.register_node("default:stone_with_tin", {
 	groups = {cracky = 2},
 	drop = "default:tin_lump",
 	sounds = default.node_sound_stone_defaults(),
+})
+minetest.register_node("default:gravel_with_tin", {
+	description = S("Tin Ore"),
+	tiles = {"default_gravel.png^default_mineral_tin.png"},
+	groups = {crumbly = 2, falling_node = 1},
+	drop = "default:tin_lump",
+	sounds = default.node_sound_gravel_defaults(),
 })
 
 minetest.register_node("default:tinblock", {
@@ -1299,6 +1320,13 @@ minetest.register_node("default:stone_with_mese", {
 	drop = "default:mese_crystal",
 	sounds = default.node_sound_stone_defaults(),
 })
+minetest.register_node("default:gravel_with_mese", {
+	description = S("Mese Ore"),
+	tiles = {"default_gravel.png^default_mineral_mese.png"},
+	groups = {crumbly = 2, falling_node = 1},
+	drop = "default:mese_crystal",
+	sounds = default.node_sound_gravel_defaults(),
+})
 
 minetest.register_node("default:mese", {
 	description = S("Mese Block"),
@@ -1317,6 +1345,13 @@ minetest.register_node("default:stone_with_gold", {
 	drop = "default:gold_lump",
 	sounds = default.node_sound_stone_defaults(),
 })
+minetest.register_node("default:gravel_with_gold", {
+	description = S("Gold Ore"),
+	tiles = {"default_gravel.png^default_mineral_gold.png"},
+	groups = {crumbly = 2, falling_node = 1},
+	drop = "default:gold_lump",
+	sounds = default.node_sound_gravel_defaults(),
+})
 
 minetest.register_node("default:goldblock", {
 	description = S("Gold Block"),
@@ -1333,6 +1368,13 @@ minetest.register_node("default:stone_with_diamond", {
 	groups = {cracky = 1},
 	drop = "default:diamond",
 	sounds = default.node_sound_stone_defaults(),
+})
+minetest.register_node("default:gravel_with_diamond", {
+	description = S("Diamond Ore"),
+	tiles = {"default_gravel.png^default_mineral_diamond.png"},
+	groups = {crumbly = 2, falling_node = 1},
+	drop = "default:diamond",
+	sounds = default.node_sound_gravel_defaults(),
 })
 
 minetest.register_node("default:diamondblock", {

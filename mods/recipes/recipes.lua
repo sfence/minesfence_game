@@ -6,8 +6,8 @@ local S = recipes.S;
 -- category -> category name string, used by machines to select only aviable recepts
 -- manual -> list of tables with one key and one value, where key mean work_name and key value mean, work_points. Work_name specify tool group which have to be used to work, higger group mean quicker work, work_point specify number of work which have to be done
 -- tool_in_order -> true if tool have to be used in order of manual definition, false when the usage in order is not required
--- input -> recipe inputs, list of list
--- output -> recipe outouts list
+-- input -> recipe inputs, list of list (default:stone, deault:tool +5)
+-- output -> recipe outouts list (default:stone, default:stone 5)
 
 recipes.recipes = {};
 
