@@ -68,7 +68,7 @@ function recipes.work_on_push(pos, node, puncher, settings)
   
   local found = recipes.find_recipe(search_recipe, 1);
   
-  -- minetest.log("warning", "Found:"..#found.." dump: "..dump(found))
+  --minetest.log("warning", "Found:"..#found.." dump: "..dump(found))
   
   if (#found>1) then
     minetest.log("error", "Found more then one recipe.")
@@ -114,6 +114,7 @@ function recipes.work_on_push(pos, node, puncher, settings)
   -- minetest.log("warning", "Progress: "..progress_string)
   -- minetest.log("warning", "Progress: "..dump(progress_list))
   local tool_use = recipes.get_tool_use(recipe, wielded_name, progress_list);
+  -- minetest.log("warning", "Tool use: "..dump(tool_use))
   
   local progress_points = recipes.progress_sum(progress_list);
   
@@ -124,35 +125,43 @@ function recipes.work_on_push(pos, node, puncher, settings)
     -- minetest.log("warning", "Punched by usefull tool.")
     -- do something
     
-    -- minetest.log("warning", "Tool use: "..dump(tool_use))
+    --minetest.log("warning", "Tool use: "..dump(tool_use))
     if (tool_use.tool_power>0) then
       progress_list[tool_use.progress_index] = progress_list[tool_use.progress_index] - tool_use.tool_power;
       progress_points = recipes.progress_sum(progress_list);
+      
+      --minetest.log("warning", "Tool wear: "..tostring(wielded:get_wear()))
+      wielded:add_wear(tool_use.tool_add_wear);
+      --minetest.log("warning", "Tool wear: "..tostring(wielded:get_wear()))
+      puncher:set_wielded_item(wielded);
+      
     end
     
-    work_hud(puncher, math.floor(100-(100*progress_points+50)/work_points))
+    work_hud(puncher, math.floor(100-(100*progress_points)/work_points))
     
     progress_string = table.concat(progress_list, ";");
     meta:set_string("progress", tostring(progress_string));
     local progress_points = recipes.progress_sum(progress_list);
     
-    -- minetest.log("warning", "State "..progress_points.."/"..work_points)
+    --minetest.log("warning", "State "..progress_points.."/"..work_points)
     
     if (progress_points==0) then
-      local output_list = recipes.create_inventory_from_output(found[1].output);
+      local output_list = recipes.create_inventory_from_output(recipe.output);
+      --minetest.log("warning", "from_list")
       if (recipes.inventory_from_list(inventory, settings.output_list, output_list)==true) then
         
-        recipes.reduce_input_inventory(input_table);
+        --minetest.log("warning", "update_inventory "..dump(input_table))
+        recipes.reduce_input_inventory(input_table, recipe.input);
         recipes.inventory_from_table(inventory, settings.input_list, input_table);
         
-        minetest.log("warning", "Done.")
+        --minetest.log("warning", "Done.")
         meta:set_string("progress", 0);
         meta:set_string("last_recipe", 0);
       end
     end
   else
     -- minetest.log("warning", "Punched by unusable tool.")
-    work_hud(puncher, math.floor(100-(100*progress_points+50)/work_points))
+    work_hud(puncher, math.floor(100-(100*progress_points)/work_points))
     return true;
   end
   

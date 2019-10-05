@@ -4,12 +4,51 @@ local S = recipes.S;
 -- Recipe
 -- name -> name of recipe
 -- category -> category name string, used by machines to select only aviable recepts
--- manual -> list of tables with one key and one value, where key mean work_name and key value mean, work_points. Work_name specify tool group which have to be used to work, higger group mean quicker work, work_point specify number of work which have to be done
+-- manual -> list of tables with one key and table of values, where key mean work_name and key value is table with work_points, level and wear. Work_name specify tool group which have to be used to work, higger group mean quicker work, work_points specify number of work which have to be done and level specify the minimal level of tool which have to be used, wear mean wear multiplication..
 -- tool_in_order -> true if tool have to be used in order of manual definition, false when the usage in order is not required
--- input -> recipe inputs, list of list (default:stone, deault:tool +5)
--- output -> recipe outouts list (default:stone, default:stone 5)
+-- input -> recipe inputs, list of list (default:stone, deault:tool +5) converted to tables
+-- output -> recipe outouts list (default:stone, default:stone 5) converted to table
+-- special -> special data for fuel, etc
 
 recipes.recipes = {};
+
+
+-- konvert recept item text to recept item table
+-- 
+-- group -> name of group
+-- name -> name of item/tool
+-- items_count -> count of item for use or product
+-- tool_wear -> change of tool wear
+local function text_item_to_table_item(recipe_item_text)
+  local group_begin = "group:"
+  
+  local recipe_item_table = {};
+  
+  local found = string.find(recipe_item_text, " ");
+  local item_number = found;
+  if not(found) then
+    found = #recipe_item_text;
+  end
+  
+  if (recipe_item_text:sub(1,#group_begin-1) == group_begin) then
+    recipe_item_table.group = recipe_item_text:sub(#group_begin, found);
+  else
+    recipe_item_table.name = recipe_item_text:sub(1, found);
+  end
+  
+  if (item_number) then
+    number_begin = string.sub(recipe_item_text, item_number, item_number);
+    if ((number_item~="+") and (number_item~="-")) then
+      recipe_item_table.items_count = tonumber(string.sub(recipe_item_text, item_number));
+    else
+      recipe_item_table.tool_wear = tonumber(string.sub(recipe_item_text, item_number));
+    end
+  else
+    recipe_item_table.items_count = 1;
+  end
+  
+  return recipe_item_table;
+end
 
 function recipes.register_recipe(recipe_data)
   if (recipe_data.name == nil) then
@@ -40,8 +79,21 @@ function recipes.register_recipe(recipe_data)
   if (recipes.recipes[recipe_data.category] == nil) then
     recipes.recipes[recipe_data.category] = {}
   end
+  recipe_data_copy = table.copy(recipe_data);
   
-  table.insert(recipes.recipes[recipe_data.category], table.copy(recipe_data))
+  -- recipe reformat some data
+  for row_index, row_data in pairs(recipe_data_copy.input) do
+    for column_index, recipe_item in pairs(row_data) do
+      row_data[column_index] = text_item_to_table_item(recipe_item);
+    end
+    recipe_data_copy.input[row_index] = row_data;
+  end
+  
+  for output_index, output_item in pairs(recipe_data_copy.output) do
+    recipe_data_copy.output[output_index] = text_item_to_table_item(output_item);
+  end
+  
+  table.insert(recipes.recipes[recipe_data.category], recipe_data_copy)
 end
 
 local function optimalize_inventory_input(inventory_input)
@@ -83,15 +135,19 @@ local function optimalize_inventory_input(inventory_input)
   return optimalized_input;
 end
 
+-- group -> name of group
+-- name -> name of item/tool
+-- items_count -> count of item for use or product
+-- tool_wear -> change of tool wear
 local function compare_recipe_item(inventory_item, recipe_item)
-  local group_begin = "group:"
   local item_name = ItemStack(inventory_item):get_name();
-  if (recipe_item:sub(1,#group_begin) == group_begin) then
-    if (minetest.get_item_group(item_name, recipe_item:sub(#group_begin))~=0) then
+  
+  if (recipe_item.group) then
+    if (minetest.get_item_group(item_name, recipe_item.group)~=0) then
       return true;
     end
   else
-    if (item_name == recipe_item) then
+    if (item_name == recipe_item.name) then
       return true;
     end
   end
@@ -188,11 +244,21 @@ function recipes.inventory_to_table(inventory, list_name)
   return inventory_table;
 end
 
-function recipes.reduce_input_inventory(inventory_table)
+function recipes.reduce_input_inventory(inventory_table, recipe_table)
   for row_index, row_data in pairs(inventory_table) do
+    local recipe_row = recipe_table[row_index];
     for column_index, item in pairs(row_data) do
-      local item_count = item:get_count();
-      item:set_count(item_count-1);
+      local recipe_item = recipe_row[column_index];
+      
+      --minetest.log("warning", "recipe_item: "..dump(recipe_item))
+      
+      if (recipe_item.items_count) then
+        local item_count = item:get_count();
+        item:set_count(item_count-recipe_item.items_count);
+      end
+      if (recipe_item.tool_wear) then
+        item:add_wear(recipe_item.tool_weare);
+      end
     end
   end
 end
@@ -219,13 +285,18 @@ end
 function recipes.inventory_from_list(inventory, list_name, inventory_list)
   local inventory_size = inventory:get_size(list_name);
   
+  --minetest.log("warning", "Size "..tostring(inventory_size))
+  
   local item_index = 1;
   
   for item_index = 1, inventory_size, 1 do
     local item = inventory_list[item_index];
     
+    --minetest.log("warning", "for item "..dump(item))
+    
     if (item ~= nil) then
       local can_be_added = inventory:room_for_item(list_name, item);
+      --minetest.log("warning", "Item "..item:get_name().." can be added: "..tostring(can_be_added).." to listname "..list_name)
       if (can_be_added==true) then
         inventory:add_item(list_name, item);
         return true;
@@ -242,19 +313,15 @@ function recipes.create_inventory_from_output(output)
   local items = #output;
   
   for item_index=1,items,1 do
-    local output_count = 0;
-    local output_text = output[item_index];
-    local found = string.find(output_text, " ");
-    if (found~=nil) then
-      output_count = tonumber(string.sub(output_text, found+1));
-      output_text = string.sub(output_text, 1, found-1);
-    else
-      output_count = 1;
-    end
+    local output_data = output[item_index];
     
-    local stack = ItemStack(output_text);
-    stack:set_count(output_count);
-    table.insert(inventory_list, stack);
+    --minetest.log("warning", "from_output: "..dump(output_data))
+    
+    if ((output_data.name) and (output_data.items_count)) then 
+      local stack = ItemStack(output_data.name);
+      stack:set_count(output_data.items_count);
+      table.insert(inventory_list, stack);
+    end
   end
   
   return inventory_list;
@@ -263,24 +330,44 @@ end
 function recipes.get_tool_use(recipe, wielded_name, progress_list)
   local use_tool = {tool_power = 0, progress_index = 0};
   
+  local function create_use_tool(wielded_name, work_name, work_data, index)
+    local use_tool = {tool_power = 0, progress_index = 0};
+    
+    local tool_maxlevel  = minetest.get_item_group(wielded_name, work_name.."_maxlevel");
+    use_tool.progress_index = index;
+      
+      local leveldiff = tool_maxlevel - work_data.level;
+    
+    if (leveldiff>=0) then
+      local tool_uses  = minetest.get_item_group(wielded_name, work_name.."_uses");
+      use_tool.tool_power  = minetest.get_item_group(wielded_name, work_name);
+      use_tool.tool_add_wear = (65535/tool_uses)*(3^leveldiff)*work_data.wear;
+    else
+      use_tool.tool_power = 0;
+      use_tool.tool_add_wear = 0;
+    end
+    
+    local leveldiff = use_tool
+    
+    return use_tool;
+  end
+  
   if (recipe.tool_in_order==true) then
     for index, work_table in pairs(recipe.manual) do
       if (progress_list[index]>0) then
-        local work_name, work_points = next(work_table, nil);
-        use_tool.tool_power  = minetest.get_item_group(wielded_name, work_name);
-        use_tool.progress_index = index;
-        return use_tool;
+        local work_name, work_data = next(work_table, nil);
+        return create_use_tool(wielded_name, work_name, work_data, index);
       end
     end
   else
     for index, work_table in pairs(recipe.manual) do
       if (progress_list[index]>0) then
-        local work_name, work_points = next(work_table, nil);
-        local tool_power  = minetest.get_item_group(wielded_name, work_name);
-        if (tool_power>0) then
-          use_tool.tool_power = tool_power;
-          use_tool.progress_index = index;
-          return use_tool;
+        local work_name, work_data = next(work_table, nil);
+        local tool_power = minetest.get_item_group(wielded_name, work_name);
+        local tool_maxlevel = minetest.get_item_group(wielded_name, work_name.."_maxlevel");
+        --minetest.log("warning", "Power: "..tostring(tool_power).." maxlevel: "..tostring(tool_maxlevel).." Work "..work_name..": "..dump(work_data))
+        if ((tool_power>0) and (tool_maxlevel>=work_data.level)) then
+          return create_use_tool(wielded_name, work_name, work_data, index);
         end
       end
     end
@@ -306,9 +393,9 @@ function recipes.create_progress_list(recipe)
   local progress_list = {};
   
   for index, work_table in pairs(recipe.manual) do
-    local work_name, work_points = next(work_table, nil);
+    local work_name, work_data = next(work_table, nil);
     
-    table.insert(progress_list, work_points);
+    table.insert(progress_list, work_data.points);
   end
   
   return progress_list;
