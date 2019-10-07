@@ -91,7 +91,7 @@ minetest.register_tool("stone_age:spike_soft_stone_medium", {
 		damage_groups = {fleshy=2},
 	},
 	sound = {breaks = "default_tool_breaks"},
-	groups = {axe = 1, disable_repair = 1}
+	groups = {spike = 1, disable_repair = 1}
 })
 
 minetest.register_tool("stone_age:spike_flint_medium", {
@@ -106,7 +106,7 @@ minetest.register_tool("stone_age:spike_flint_medium", {
 		damage_groups = {fleshy=2},
 	},
 	sound = {breaks = "default_tool_breaks"},
-	groups = {axe = 1, disable_repair = 1}
+	groups = {spike = 1, disable_repair = 1}
 })
 
 minetest.register_tool("stone_age:spike_flint_precise", {
@@ -121,8 +121,12 @@ minetest.register_tool("stone_age:spike_flint_precise", {
 		damage_groups = {fleshy=2},
 	},
 	sound = {breaks = "default_tool_breaks"},
-	groups = {axe = 1, disable_repair = 1}
+	groups = {spike = 1, disable_repair = 1}
 })
+
+--
+-- saw
+--
 
 minetest.register_tool("stone_age:saw_small_flint", {
 	description = S("Hand axe"),
@@ -136,5 +140,52 @@ minetest.register_tool("stone_age:saw_small_flint", {
 		damage_groups = {fleshy=2},
 	},
 	sound = {breaks = "default_tool_breaks"},
+	groups = {saw = 1, disable_repair = 1}
+})
+
+-- 
+-- sickle
+--
+
+minetest.register_tool("stone_age:sickle_flint", {
+	description = S("Hand axe"),
+	inventory_image = "stone_age_hand_axe.png",
+	tool_capabilities = {
+		full_punch_interval = 2.0,
+		max_drop_level=0,
+		groupcaps={
+			choppy = {times={[2]=18.2, [3]=3.60}, uses=20, maxlevel=1},
+		},
+		damage_groups = {fleshy=2},
+	},
+	sound = {breaks = "default_tool_breaks"},
 	groups = {axe = 1, disable_repair = 1}
 })
+
+-- 
+-- make fire tools
+--
+
+
+--
+-- weapons normal
+--
+
+minetest.register_tool("stone_age:lance_wood", {
+	description = S("Wooden lance"),
+	inventory_image = "stone_age_lance_wood.png",
+	tool_capabilities = {
+		full_punch_interval = 2.0,
+		max_drop_level=0,
+		groupcaps={
+			choppy = {times={[2]=18.2, [3]=3.60}, uses=20, maxlevel=1},
+		},
+		damage_groups = {fleshy=2},
+	},
+	sound = {breaks = "default_tool_breaks"},
+	groups = {lance = 1, disable_repair = 1}
+})
+
+--
+-- weapons fire
+--

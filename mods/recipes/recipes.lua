@@ -341,7 +341,7 @@ function recipes.get_tool_use(recipe, wielded_name, progress_list)
     if (leveldiff>=0) then
       local tool_uses  = minetest.get_item_group(wielded_name, work_name.."_uses");
       use_tool.tool_power  = minetest.get_item_group(wielded_name, work_name);
-      use_tool.tool_add_wear = (65535/tool_uses)*(3^leveldiff)*work_data.wear;
+      use_tool.tool_add_wear = (65535/(tool_uses*(3^leveldiff)))*work_data.wear;
     else
       use_tool.tool_power = 0;
       use_tool.tool_add_wear = 0;
