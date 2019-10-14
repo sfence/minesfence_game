@@ -1,12 +1,10 @@
 
 local S = vegetation.S;
 
--- Vegetation
--- name -> vegetation node_name
--- type -> plant, bush, tree
-
+-- Vegetation event/presence chance
 -- presence of vegetation based on different environment characteristic is configured by setting structure
 -- see vegetation.probability_function for more details
+-- basic_chance -> basic chance of event
 -- altitude_presence -> presence by altitude
 -- heat_presence -> presence by heat
 -- humidity_presence -> presence by humidity
@@ -14,43 +12,9 @@ local S = vegetation.S;
 -- morning_light_presence -> presence by light intenzity on morning
 -- midday_light_presence -> presence by light intenzity on midday
 -- evening_light_presence -> presence by light intenzity on evening
+-- near_presence -> presence by near nodes {area_min, area_max, node_names, distance_multiplier, distance_exponent, distance_base, present parameters}
 -- biome_presence -> presence by biome parameter/group, table of presence where keys to table represent biome parameter/group name
 --                -> if biome not have a parameter/group, vegetable cannot grow in that biome.
-
-vegetation.vegetation = {};
-
-function vegetation.register_vegetation(vegetation_data)
-  if (vegetation_data.name == nil) then
-    minetest.log("error", "[Recipes] ignore to register recipe without name.")
-    return
-  end
-  if (vegetation_data.category == nil) then
-    minetest.log("error", "[Recipes] ignore to register recipe without category.")
-    return
-  end
-  if (vegetation_data.manual == nil) then
-    minetest.log("error", "[Recipes] ignore to register recipe without manual.")
-    return
-  end
-  if (vegetation_data.tool_in_order == nil) then
-    minetest.log("error", "[Recipes] ignore to register recipe without tool_in_order specification.")
-    return
-  end
-  if (vegetation_data.output == nil) then
-    minetest.log("error", "[Recipes] ignore to register recipe without output.")
-    return
-  end
-  if (vegetation_data.input == nil) then
-    minetest.log("error", "[Recipes] ignore to register recipe without inputs.")
-    return
-  end
-  
-  if (vegetation.vegetation[recipe_data.category] == nil) then
-    vegetation.vegetation[recipe_data.category] = {}
-  end
-  
-  table.insert(recipes.recipes[recipe_data.category], table.copy(recipe_data))
-end
 
 vegetation.biome_parameters = {};
 
@@ -78,33 +42,82 @@ end
 -- in settings table (max_probability, lower_steepness, lower_border, upper_steepness, upper_border)
 -- x is stored in actual_value fucntion parameter
 
+-- lower_steepness -> function parameter
+-- lower_border -> function parameter
+-- upper_steepness -> function parameter
+-- upper_border -> function parameter
+-- probability_multiplier -> function parameter
+-- probability_offset -> function parameter
+
 function vegetation.probability_function(presence, actual_value)
   local first_part = 1/(1+presence.lower_steepness^(-actual_value+presence.lower_border));
   local second_part = 1/(1+presence.upper_steepness^(actual_value-presence.upper_border));
-  local probability = presence.max_probability * math.abs(first_part + second_part - 1);
+  local probability = math.abs(first_part + second_part - 1);
+  local probalility = presence.probability_offset + (presence.probability_multiplier * probalility);
   return probability;
 end
 
-function vegetation.presence_chance(pos, presence_def)
-  local grow_chance = 1.0;
+function vegetation.presence_chance(pos, presence_def, basic_chance_rewrite)
+  local basic_chance = presence_def.basic_chance;
+  if (basic_chance_rewrite~=0.0) then
+    basic_chance = basic_chance_rewrite;
+  end
+  if (basic_chance==0.0) then
+    return 0.0;
+  end
+  local presence_chance = 1.0;
   
-  grow_chance = grow_chance * vegetation.probability_function(presence_def.altitude_presence, pos.y);
+  presence_chance = presence_chance * vegetation.probability_function(presence_def.altitude_presence, pos.y);
   
   biome_data = minetest.get_biome_data(pos);
   
-  grow_chance = grow_chance * vegetation.probability_function(presence_def.heat_presence, biome_data.heat);
-  grow_chance = grow_chance * vegetation.probability_function(presence_def.humidity_presence, biome_data.humidity);
+  presence_chance = presence_chance * vegetation.probability_function(presence_def.heat_presence, biome_data.heat);
+  presence_chance = presence_chance * vegetation.probability_function(presence_def.humidity_presence, biome_data.humidity);
   if not(presence_def.midnight_light_presence) then
-    grow_chance = grow_chance * vegetation.probability_function(presence_def.midnight_light_presence, minetest.get_node_light(pos, 0.0));
+    presence_chance = presence_chance * vegetation.probability_function(presence_def.midnight_light_presence, minetest.get_node_light(pos, 0.0));
   end
   if not(presence_def.morning_light_presence) then
-    grow_chance = grow_chance * vegetation.probability_function(presence_def.morning_light_presence, minetest.get_node_light(pos, 0.25));
+    presence_chance = presence_chance * vegetation.probability_function(presence_def.morning_light_presence, minetest.get_node_light(pos, 0.25));
   end
   if not(presence_def.midday_light_presence) then
-    grow_chance = grow_chance * vegetation.probability_function(presence_def.midday_light_presence, minetest.get_node_light(pos, 0.5));
+    presence_chance = presence_chance * vegetation.probability_function(presence_def.midday_light_presence, minetest.get_node_light(pos, 0.5));
   end
   if not(presence_def.evening_light_presence) then
-    grow_chance = grow_chance * vegetation.probability_function(presence_def.evening_light_presence, minetest.get_node_light(pos, 0.75));
+    presence_chance = presence_chance * vegetation.probability_function(presence_def.evening_light_presence, minetest.get_node_light(pos, 0.75));
+  end
+  
+  if (#presence_def.near_presence>0) then
+    for parameter_key, parameter_presence in pairs(presence_def.near_presence) do
+      local founds = {};
+      if ((parameter_presence.area_min~=nil) and (parameter_presence.area_max~=nil)) then
+        local area_min = {x = pos.x + parameter_presence.area_min.x,
+                          y = pos.y + parameter_presence.area_min.y,
+                          z = pos.z + parameter_presence.area_min.z};
+        local area_max = {x = pos.x + parameter_presence.area_max.x,
+                          y = pos.y + parameter_presence.area_max.y,
+                          z = pos.z + parameter_presence.area_max.z};
+        founds = minetest.find_nodes_in_area(area_min, area_max, parameter_presence.node_names);
+      else
+        local found = minetest.find_node_near(pos, parameter_presence.node_names);
+        table.insert(founds, found);
+      end
+      
+      local near_points = 0;
+      
+      for key, found in pairs(founds) do
+        local found_node = minetest.get_node(found);
+        local distance = vector.distance(pos, found);
+        local found_def = minetest.registered_nodes[found_node.name];
+        local node_points = 1;
+        if ((found_def) and (found_def.drawtype=="leveled")) then
+          node_points = node_points * (minetest.get_node_level(found)/minetest.get_node_max_level(found));
+        end
+        
+        node_points = node_points * (1/(distance*presence_def.distance_multiplier))*(1/(distance^presence_def.distance_exponent))*(1/(presence_def.base^distance));
+        
+        presence_chance = presence_chance * vegetation.probability_function(parameter_presence, node_points);
+      end
+    end
   end
   
   if (#presence_def.biome_presence>0) then
@@ -119,11 +132,13 @@ function vegetation.presence_chance(pos, presence_def)
         --minetest.log("warning", "Biome "..biome_name.." don't have registered parameter "..parameter_key);
         return 0.0;
       end
-      grow_chance = grow_chance * vegetation.probability_function(parameter_presence, parameter_value);
+      presence_chance = presence_chance * vegetation.probability_function(parameter_presence, parameter_value);
     end
   end
   
-  return grow_chance;
+  presence_chance = presence_chance * basic_chance;
+  
+  return presence_chance;
 end
 
 -- spreading_def
@@ -131,9 +146,13 @@ end
 -- distance of spreading is calculated by find a solution for distance of function chance = 1/(parameter^distance)
 -- parameter have to be number bigger then 1, recomended values are between 1.05 and 1.5.
 -- 
+-- presence -> table with presence definitions for get chance of spreading done
+-- 
 -- distance_parameter -> means parameter in function
 -- area_min, area_max -> area limits to look for good spreading location around random location
 -- target_nodes -> list of names of nodes which can be affected, group names are supported
+-- target_change -> name of target change to inicialize
+-- change_basic_chance -> basic chance of spreading success to change target
 -- max_nodes -> affected nodes limit
 
 function vegetation.spreading_locations(pos, spreading_def)
