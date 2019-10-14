@@ -15,6 +15,7 @@ local default_path = minetest.get_modpath("stone_age")
 dofile(default_path.."/nodes.lua")
 dofile(default_path.."/tools.lua")
 -- dofile(default_path.."/craftitems.lua")
+dofile(default_path.."/items.lua")
 dofile(default_path.."/crafting.lua")
 -- dofile(default_path.."/mapgen.lua")
 

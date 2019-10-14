@@ -287,7 +287,15 @@ function recipes.inventory_from_list(inventory, list_name, inventory_list)
   
   --minetest.log("warning", "Size "..tostring(inventory_size))
   
-  local item_index = 1;
+  for item_index = 1, inventory_size, 1 do
+    local item = inventory_list[item_index];
+    if (item ~= nil) then
+      local can_be_added = inventory:room_for_item(list_name, item);
+      if (can_be_added~=true) then
+        return false;
+      end
+    end
+  end
   
   for item_index = 1, inventory_size, 1 do
     local item = inventory_list[item_index];
@@ -295,16 +303,12 @@ function recipes.inventory_from_list(inventory, list_name, inventory_list)
     --minetest.log("warning", "for item "..dump(item))
     
     if (item ~= nil) then
-      local can_be_added = inventory:room_for_item(list_name, item);
       --minetest.log("warning", "Item "..item:get_name().." can be added: "..tostring(can_be_added).." to listname "..list_name)
-      if (can_be_added==true) then
-        inventory:add_item(list_name, item);
-        return true;
-      end
+      inventory:add_item(list_name, item);
     end
   end
   
-  return false;
+  return true;
 end
 
 function recipes.create_inventory_from_output(output)

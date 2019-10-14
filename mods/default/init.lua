@@ -19,6 +19,7 @@ minetest.register_on_joinplayer(function(player)
 			background[5,5;1,1;gui_formbg.png;true]
 			background[5,5;1,1;gui_formbg.png;true;10]
 			listcolors[#00000069;#5A5A5A;#141318;#30434C;#FFF] ]])
+  --player:set_physics_override({speed=0.1});
 end)
 
 function default.get_hotbar_bg(x,y)

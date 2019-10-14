@@ -66,12 +66,15 @@ function recipes.work_on_push(pos, node, puncher, settings)
   
   -- minetest.log("warning", "Look for recipe category: "..dump(search_recipe.categories))
   
-  local found = recipes.find_recipe(search_recipe, 1);
+  local found = recipes.find_recipe(search_recipe, 4);
   
   --minetest.log("warning", "Found:"..#found.." dump: "..dump(found))
   
-  if (#found>1) then
-    minetest.log("error", "Found more then one recipe.")
+  local recipe_index = meta:get_int("formspec_recipe_select");
+  
+  if ((recipe_index < 1) or (recipe_index>#found)) then
+    --minetest.log("warning", "Index: "..tonumber(recipe_index).." found: "..dump(found))
+    minetest.log("error", "Recipe select error.")
     meta:set_string("last_recipe", "");
     return true;
   end
@@ -82,7 +85,7 @@ function recipes.work_on_push(pos, node, puncher, settings)
     return true;
   end
   
-  local recipe = found[1];
+  local recipe = found[recipe_index];
   
   local recipe_sha1 = minetest.sha1(dump(recipe));
   local last_recipe = meta:get_string("last_recipe");
@@ -166,5 +169,47 @@ function recipes.work_on_push(pos, node, puncher, settings)
   end
   
   return false;
+end
+
+-- support recipe select formspec update
+
+function recipes.find_recipes(pos, settings, outputs_limit)
+  local meta = minetest.get_meta(pos);
+  local inventory = meta:get_inventory();
+  local input_table = recipes.inventory_to_table(inventory, settings.input_list);
+  
+  local search_recipe = {categories = settings.recipe_categories, input = input_table};
+  
+  local founds = recipes.find_recipe(search_recipe, outputs_limit);
+  
+  return founds;
+end
+
+function recipes.on_receive_fields(pos, fields, settings, outputs_limit)
+  local field = fields[settings.selection_field_name];
+  
+  if (field~=nil) then
+    local index = string.find(field, ":");
+    index = tonumber(string.sub(field, index+1)); 
+    local meta = minetest.get_meta(pos);
+    meta:set_int("formspec_recipe_select", index);
+    
+    local founds = recipes.find_recipes(pos, settings, outputs_limit);
+    meta:set_string("formspec", settings.formspec_function(founds, index));
+  end
+end
+
+function recipes.on_inventory_update(pos, settings, outputs_limit)
+  local meta = minetest.get_meta(pos);
+  local index = meta:get_int("formspec_recipe_select");
+  
+  local founds = recipes.find_recipes(pos, settings, outputs_limit);
+  
+  if ((index<1) or (index<#founds)) then
+    index = 1;
+    meta:set_int("formspec_recipe_select", index);
+  end
+  
+  meta:set_string("formspec", settings.formspec_function(founds, index));
 end
 

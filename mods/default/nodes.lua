@@ -431,6 +431,7 @@ minetest.register_node("default:dirt", {
 	tiles = {"default_dirt.png"},
 	groups = {crumbly = 3, falling_node = 1, soil = 1},
 	drowning = 1,
+  --stack_max = 1,
 	sounds = default.node_sound_dirt_defaults(),
 })
 
@@ -2674,6 +2675,7 @@ local function register_sign(material, desc, def)
 			meta:set_string("formspec", "field[text;;${text}]")
 		end,
 		on_receive_fields = function(pos, formname, fields, sender)
+      minetest.log("warning", "Sign on receive.");
 			--print("Sign at "..minetest.pos_to_string(pos).." got "..dump(fields))
 			local player_name = sender:get_player_name()
 			if minetest.is_protected(pos, player_name) then
