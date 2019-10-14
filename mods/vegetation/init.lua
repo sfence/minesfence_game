@@ -13,7 +13,8 @@ end
 local vegetation_path = minetest.get_modpath("vegetation")
 
 dofile(vegetation_path.."/vegetation.lua")
---dofile(vegetation_path.."/work.lua")
+dofile(vegetation_path.."/plant.lua")
+dofile(vegetation_path.."/tree.lua")
 
 vegetation.S = nil
 

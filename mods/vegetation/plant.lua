@@ -28,8 +28,6 @@ vegetation.registered_plants = {};
 
 -- plant definition
 --
--- name -> name of plant
--- 
 -- changes_to -> table with tables with target_node and present definitions {target_node="targer_node", *_presence = {}, ...} 
 --            -> table keys is used like description (grow_to, pollen_to, fertilize_to, dry_to, pest_to, rot_to, mould_to etc)
 
@@ -43,20 +41,24 @@ function vegetation.register_plant(node_name, plant_def)
   end
   if (type(plant_def)~="table") then
     minetest.log("warning", "Cannot register plant for node "..node_name.." without plant definition.");
+    return
   end
   
-  if (type(plant_def.name)~="string") then
-    minetest.log("warning", "Cannot register plant for node "..node_name.." without plant name.");
+  if (type(plant_def.changes_to)~="table") then
+    minetest.log("warning", "Cannot register plant for node "..node_name.." without plant changes_to table.");
+    return
   end
   
-  if (type(plant_def.grow_to)~="table") then
-    minetest.log("warning", "Cannot register plant for node "..node_name.." without plant grow_to table.");
+  if (type(plant_def.spreadings)~="table") then
+    minetest.log("warning", "Cannot register plant for node "..node_name.." without plant spreadings table.");
+    return
   end
   
   vegetation.registered_plants[node_name] = plant_def;
 end
 
 function vegetation.plant_grow(pos, node)
+  minetest.log("warning", "Plant grow of node "..node.name);
   -- find plant definition
   local plant_def = vegetation.registered_plants[node.name];
   if (plant_def == nil) then
@@ -66,9 +68,12 @@ function vegetation.plant_grow(pos, node)
   -- look for possible changes of node
   for key, change_to in pairs(plant_def.changes_to) do
     local change_chance = vegetation.presence_chance(pos, change_to, 0.0);
+    minetest.log("warning", "Plant change_to "..change_to.target_node.." with chance "..tostring(change_chance));
     if (change_chance>0) then
-      local chance = default.random_generator:next(16777215)/16777215.0;
+      local chance = default.random_generator:next(0,16777215)/16777215.0;
+        minetest.log("warning", "Chance "..tostring(chance));
       if (chance<=change_chance) then
+        minetest.log("warning", "Plant grow.");
         minetest.swap_node(pos, {name=change_to.target_node});
         return;
       end

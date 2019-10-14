@@ -325,7 +325,7 @@ function vegetation.tree_part_check_grow_on(grow_variants, tree_def, supporter_p
           and ((supporter_def.size-tree_part_def.size)<=tree_part_def.size_diff)
           and (check_pos_part_size<tree_part_def.size)) then
         for hash_pos,grow_data in pairs(tree_part_def.grow_on) do
-          grow_on_pos = minetest.get_position_from_hash(hash_pos)); 
+          grow_on_pos = minetest.get_position_from_hash(hash_pos); 
           -- condition is relevant only for relevant grow_on by the position of supporter and eheck_pos
           if (    ((supporter_pos.x+grow_on_pos.x)==check_pos.x)
               and ((supporter_pos.y+grow_on_pos.y)==check_pos.y)

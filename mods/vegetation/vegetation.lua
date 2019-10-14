@@ -53,7 +53,7 @@ function vegetation.probability_function(presence, actual_value)
   local first_part = 1/(1+presence.lower_steepness^(-actual_value+presence.lower_border));
   local second_part = 1/(1+presence.upper_steepness^(actual_value-presence.upper_border));
   local probability = math.abs(first_part + second_part - 1);
-  local probalility = presence.probability_offset + (presence.probability_multiplier * probalility);
+  probability = presence.probability_offset + (presence.probability_multiplier * probability);
   return probability;
 end
 
@@ -67,22 +67,25 @@ function vegetation.presence_chance(pos, presence_def, basic_chance_rewrite)
   end
   local presence_chance = 1.0;
   
+  minetest.log("warning", "altitude_presence "..dump(presence_def.altitude_presence));
   presence_chance = presence_chance * vegetation.probability_function(presence_def.altitude_presence, pos.y);
   
-  biome_data = minetest.get_biome_data(pos);
+  local biome_data = minetest.get_biome_data(pos);
   
+  minetest.log("warning", "heat_presence "..dump(presence_def.heat_presence));
   presence_chance = presence_chance * vegetation.probability_function(presence_def.heat_presence, biome_data.heat);
+  minetest.log("warning", "humidity_presence "..dump(presence_def.humidity_presence));
   presence_chance = presence_chance * vegetation.probability_function(presence_def.humidity_presence, biome_data.humidity);
-  if not(presence_def.midnight_light_presence) then
+  if (presence_def.midnight_light_presence~=nil) then
     presence_chance = presence_chance * vegetation.probability_function(presence_def.midnight_light_presence, minetest.get_node_light(pos, 0.0));
   end
-  if not(presence_def.morning_light_presence) then
+  if (presence_def.morning_light_presence~=nil) then
     presence_chance = presence_chance * vegetation.probability_function(presence_def.morning_light_presence, minetest.get_node_light(pos, 0.25));
   end
-  if not(presence_def.midday_light_presence) then
+  if (presence_def.midday_light_presence~=nil) then
     presence_chance = presence_chance * vegetation.probability_function(presence_def.midday_light_presence, minetest.get_node_light(pos, 0.5));
   end
-  if not(presence_def.evening_light_presence) then
+  if (presence_def.evening_light_presence~=nil) then
     presence_chance = presence_chance * vegetation.probability_function(presence_def.evening_light_presence, minetest.get_node_light(pos, 0.75));
   end
   
