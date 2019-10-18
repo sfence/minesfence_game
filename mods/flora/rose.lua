@@ -2,7 +2,7 @@
 local S = flora.S;
 
 --
--- roses
+-- rose
 --
 
 -- red rose

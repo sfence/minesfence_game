@@ -13,6 +13,7 @@ end
 local flora_path = minetest.get_modpath("flora")
 
 dofile(flora_path.."/rose.lua")
+dofile(flora_path.."/pine.lua")
 
 -- abm function
 minetest.register_abm({
