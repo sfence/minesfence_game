@@ -12,7 +12,7 @@ local function register_rose(name, desc, box, f_groups)
 	-- Common flowers' groups
 	f_groups.snappy = 3
 	f_groups.flower = 1
-	f_groups.flora = 1
+	f_groups.flora_plant = 1
 	f_groups.attached_node = 1
 
 	minetest.register_node("flora:" .. name, {

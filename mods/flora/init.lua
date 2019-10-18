@@ -17,7 +17,7 @@ dofile(flora_path.."/rose.lua")
 -- abm function
 minetest.register_abm({
 	label = "Flora growing",
-	nodenames = {"group:flora"},
+	nodenames = {"group:flora_plant"},
 	interval = 10,
   chance = 1,
 	catch_up = false,
