@@ -58,7 +58,7 @@ function vegetation.register_plant(node_name, plant_def)
 end
 
 function vegetation.plant_grow(pos, node)
-  minetest.log("warning", "Plant grow of node "..node.name);
+  --minetest.log("warning", "Plant grow of node "..node.name);
   -- find plant definition
   local plant_def = vegetation.registered_plants[node.name];
   if (plant_def == nil) then
@@ -68,12 +68,12 @@ function vegetation.plant_grow(pos, node)
   -- look for possible changes of node
   for key, change_to in pairs(plant_def.changes_to) do
     local change_chance = vegetation.presence_chance(pos, change_to, 0.0);
-    minetest.log("warning", "Plant change_to "..change_to.target_node.." with chance "..tostring(change_chance));
+    --minetest.log("warning", "Plant change_to "..change_to.target_node.." with chance "..tostring(change_chance));
     if (change_chance>0) then
       local chance = default.random_generator:next(0,16777215)/16777215.0;
-        minetest.log("warning", "Chance "..tostring(chance));
+        --minetest.log("warning", "Chance "..tostring(chance));
       if (chance<=change_chance) then
-        minetest.log("warning", "Plant grow.");
+        --minetest.log("warning", "Plant grow.");
         minetest.swap_node(pos, {name=change_to.target_node});
         return;
       end
