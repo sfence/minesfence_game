@@ -12,6 +12,7 @@ local S = vegetation.S;
 -- morning_light_presence -> presence by light intenzity on morning
 -- midday_light_presence -> presence by light intenzity on midday
 -- evening_light_presence -> presence by light intenzity on evening
+-- callback_presence -> presence be callback function
 -- near_presence -> presence by near nodes {area_min, area_max, node_names, distance_multiplier, distance_exponent, distance_base, present parameters}
 -- biome_presence -> presence by biome parameter/group, table of presence where keys to table represent biome parameter/group name
 --                -> if biome not have a parameter/group, vegetable cannot grow in that biome.
@@ -89,6 +90,13 @@ function vegetation.presence_chance(pos, presence_def, basic_chance_rewrite)
     presence_chance = presence_chance * vegetation.probability_function(presence_def.evening_light_presence, minetest.get_node_light(pos, 0.75));
   end
   
+  if (presence_def.callback_presence~=nil) then
+    for parameter_key, parameter_presence in pairs(presence_def.callback_presence) do
+      local callback_points = parameter_presence.callback(pos, parameter_presence.parameters);
+      presence_chance = presence_chance * vegetation.probability_function(parameter_presence, callback_points);
+    end
+  end
+  
   if (#presence_def.near_presence>0) then
     for parameter_key, parameter_presence in pairs(presence_def.near_presence) do
       local founds = {};
@@ -142,6 +150,20 @@ function vegetation.presence_chance(pos, presence_def, basic_chance_rewrite)
   presence_chance = presence_chance * basic_chance;
   
   return presence_chance;
+end
+
+function vegetation.presence_callback_biome_parameter(pos, parameters)
+  biome_parameters = vegetation.biome_parameters[biome_name];
+  if (biome_parameters==nil) then
+    --minetest.log("warning", "Biome "..biome_name.." don't have registered any parameters.");
+    return 0.0;
+  end
+  local parameter_value = vegetation.biome_parameters[parameters.parameter_key];
+  if (parameter_value==nil) then
+    --minetest.log("warning", "Biome "..biome_name.." don't have registered parameter "..parameter_key);
+    return 0.0;
+  end
+  return parameter_value;
 end
 
 -- spreading_def
