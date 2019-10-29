@@ -1,0 +1,12 @@
+Changeable changes:
+
+wet -> make mod more wet
+dry -> make node more dry
+
+stabilization -> change node to stable (for nodes with firmness)
+destabilization -> change stable node to normal (with checking of firmness)
+
+smash -> break down to pieces (stone smash into stones etc).
+      -> smash result should be falling_node
+
+erosion -> erosion effect

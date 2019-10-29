@@ -31,6 +31,16 @@ function default.is_should_fall(pos, node, only_firmness, to_stable)
   
   local pos_find = table.copy(pos);
   pos_find.y = pos.y - 1;
+    
+  local check_node = minetest.get_node(pos_find);
+  if (check_node.name=="ignore") then
+    return false;
+  end
+  local node_def = minetest.registered_nodes[check_node.name];
+  if (node_def.walkable==true) then
+    return false;
+  end
+  
   local pos_distance = table.copy(pos_find);
   
   if (firmness>0) then
@@ -168,6 +178,7 @@ function default.check_neighbour_for_fall(pos)
         if (check_node.name~="ignore") then
           local fall_it = default.is_should_fall(check_pos, check_node, true, false);
           if (fall_it==true) then
+            minetest.log("warning", "Fall node x: "..tostring(check_pos.x).." y: "..tostring(check_pos.y).." z: "..tostring(check_pos.z));
             default.fall_stable_node(check_pos, check_node, true); 
             if (y_diff>0) then
               --minetest.log("warning", "Near refall check of "..check_node.name);
@@ -203,6 +214,7 @@ function default.check_for_cavein(pos)
     if (node_walkable==true) then
       return;
     end
+    minetest.log("warning", "Walkable under: "..dump(node_walkable).." node: "..check_node.name.." pos: "..dump(check_pos))
     
     local no_cavein_points = 0;
     local cavein_points = 0;
@@ -234,7 +246,7 @@ function default.check_for_cavein(pos)
                 table.insert(recall_pos, table.copy(check_pos));
               end
               
-              minetest.log("warning", "CaveIn points: "..tostring(cavein_points).."No cavin points:"..tostring(no_cavein_points).." cavein: "..tostring(cavein).." y_factor: "..tostring(y_factor).." distance:"..tostring(distance).." node_walkable: "..tostring(node_walkable));
+              minetest.log("warning", "CaveIn points: "..tostring(cavein_points).." No cavin points:"..tostring(no_cavein_points).." cavein: "..tostring(cavein).." y_factor: "..tostring(y_factor).." distance:"..tostring(distance).." node_walkable: "..tostring(node_walkable));
             end
           end
         end
@@ -247,6 +259,12 @@ function default.check_for_cavein(pos)
     minetest.log("warning", "Chance: "..tostring(chance).." No_cavein_chance: "..tostring(no_cavein_chance));
     
     if (chance>no_cavein_chance) then
+      minetest.log("warning", "Fall pos: "..dump(pos))
+      local check_pos = table.copy(pos);
+      check_pos.y = pos.y -1;
+      local node_def = minetest.registered_nodes[check_node.name];
+      minetest.log("warning", "Walkable under: "..dump(node_walkable).." node: "..check_node.name.." pos: "..dump(check_pos))
+      --default.apply_node_change(pos, node, "crack");
       default.fall_stable_node(pos, node, false);
       
       for key, recall_pos in pairs(recall_pos) do
@@ -388,6 +406,8 @@ function default.fall_stable_node(pos, node, check_cavein)
           
           if ((x_diff~=0) or (y_diff~=0) or (z_diff~=0)) then
             --minetest.log("warning", "X: "..tostring(check_pos.x).." Y:"..tostring(check_pos.y).." Z: "..tostring(check_pos.z));
+            minetest.log("warning", "CaveIn check from fall stable node.")
+            --minetest.log("warning", debug.traceback())
             default.check_for_cavein(check_pos);
           end
         end
@@ -419,7 +439,7 @@ function default.firmness_abm_action(pos, node)
 end
 
 function default.firmness_after_destruct(pos, oldnode)
-  minetest.log("warning", "after_destruct");
+  minetest.log("warning", "after_destruct X: "..tostring(pos.x).." Y: "..tostring(pos.y).." Z:"..tostring(pos.z));
   default.neighbour_stable_to_normal(pos);
   --default.check_neighbour_for_fall(pos);
   minetest.after(1, default.check_neighbour_for_fall, pos);
@@ -480,3 +500,12 @@ function default.register_node_with_firmness(node_def, settings)
   end
 end
 
+minetest.register_abm({
+  label = "Check Firmness",
+  nodenames = {"group:firmness"},
+  neighbors = {"group:air","group:water","air"},
+  interval = 20,
+  chance = 6,
+  catch_up = false,
+  action = default.firmness_abm_action,
+})

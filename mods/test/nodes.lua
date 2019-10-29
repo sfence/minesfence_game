@@ -50,18 +50,18 @@ minetest.register_node("test:firmness_falling", {
 
 default.register_firmness_node_change("test:firmness", "test:firmness_falling", "test:firmness_stable");
 
-minetest.register_abm({
-	label = "Test firmness",
-	nodenames = {"test:firmness"},
-	neighbors = {
-		"air",
-	},
-	--interval = 61,
-	interval = 11,
-	chance = 6,
-	catch_up = false,
-  action = default.firmness_abm_action,
-});
+--minetest.register_abm({
+--	label = "Test firmness",
+--	nodenames = {"test:firmness"},
+--	neighbors = {
+--		"air",
+--	},
+--	--interval = 61,
+--	interval = 11,
+--	chance = 6,
+--	catch_up = false,
+--  action = default.firmness_abm_action,
+--});
 
 local test_formspec1 = 
     "size[8,9;]"..

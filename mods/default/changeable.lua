@@ -35,7 +35,7 @@ function default.register_changeable_node_change(node_name, change_name, change_
     return
   end
   
-  if ((type(change_def.allow_change)~="nil")&&(type(change_def.allow_change)~="function")) then
+  if ((type(change_def.allow_change)~="nil") and (type(change_def.allow_change)~="function")) then
     minetest.log("warning", "Cannot register changeable node "..node_name.." change "..change_name.." with missing allow_change function in change definition.");
     return
   end
@@ -47,14 +47,18 @@ function default.register_changeable_node_change(node_name, change_name, change_
   end
   
   changable_node.changes[change_name] = change_def;
+  default.registered_changeable_nodes[node_name] = changable_node;
   
-  table.insert(register_changeable_nodes_by_change_names[change_name], node_name);
+  if (default.register_changeable_nodes_by_change_names[change_name]==nil) then
+    default.register_changeable_nodes_by_change_names[change_name] = {};
+  end
+  table.insert(default.register_changeable_nodes_by_change_names[change_name], node_name);
   
   if (minetest.registered_nodes[node_name]~=nil) then
-    minetest.log("error", "Changeable source node name "..node_name.." is not valid registered node name. ( for change \""..change_name..""\")")
+    minetest.log("error", "Changeable source node name "..node_name.." is not valid registered node name. ( for change \""..change_name.."\")")
   end
   if (minetest.registered_nodes[change_def.new_node_name]~=nil) then
-    minetest.log("error", "Changeable target node name "..change_def.new_node_name.." is not valid registered node name. ( for change \""..change_name..""\")")
+    minetest.log("error", "Changeable target node name "..change_def.new_node_name.." is not valid registered node name. ( for change \""..change_name.."\")")
   end
 end
 
@@ -66,10 +70,15 @@ function default.apply_node_change(pos, node, change_name)
   
   changable_node = default.registered_changeable_nodes[node.name];
   
+  --minetest.log("warning", "Node "..node.name.." change "..change_name.." with data: "..dump(changable_node))
+  --minetest.log("warning", dump(default.registered_changeable_nodes))
+  
   if (changable_node~=nil) then
-    change_def = changable_node.changes[change_name];
+    local change_def = changable_node.changes[change_name];
+    --minetest.log("warning","change_def: "..dump(change_def))
     if (change_def~=nil) then
-      if ((change_def.allow_change==nil)||(change_def.allow_change(pos, node)==true) then
+      if ((change_def.allow_change==nil) or (change_def.allow_change(pos, node)==true)) then
+        --minetest.log("warning", "Change "..node.name.." to "..change_def.new_node_name..".")
         minetest.swap_node(pos, {name=change_def.new_node_name});
         if (change_def.check_stability==true) then
           minetest.check_for_falling(pos);

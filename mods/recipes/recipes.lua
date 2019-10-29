@@ -184,10 +184,32 @@ local function compare_recipe_input(inventory_input, recipe_input)
   return false;
 end
 
+local function compare_recipe_output(inventory_output, recipe_output)
+  minetest.log("warning", "inventory outputs: "..tostring(#inventory_output).." recipe outputs: "..tostring(#recipe_output))
+  if (#inventory_output >= #recipe_output) then
+    for index, inventory_item in pairs(inventory_output) do
+      local found = false;
+      minetest.log("warning", "inv item: "..dump(inventory_item))
+      for recipe_index, recipe_item in pairs(recipe_output) do
+        minetest.log("warning", "recipe item: "..dump(recipe_item))
+        if (compare_recipe_item(inventory_item, recipe_item)==true) then
+          found = true;
+          break;
+        end
+      end
+      if (found==false) then
+        return false;
+      end
+    end
+    return true;
+  end
+  return false;
+end
+
 local function compare_recipe_table(inventory_input, recipe_input)
 end
 
-function recipes.find_recipe(search_data, outputs_limit) 
+function recipes.find_recipe_by_input(search_data, outputs_limit) 
   local found_recipes = {};
   
   if (search_data.categories == nil) then
@@ -209,6 +231,33 @@ function recipes.find_recipe(search_data, outputs_limit)
         if (compare_recipe_input(search_inputs, recipe.input)==true) then
           table.insert(found_recipes, recipe)
         end
+      end
+    end
+  end
+  
+  return found_recipes;
+end
+
+function recipes.find_recipe_by_output(search_data) 
+  local found_recipes = {};
+  
+  if (search_data.categories == nil) then
+    minetest.log("error", "[Recipes] ignore to search recipe by output without categories.")
+    return found_recipes;
+  end
+  if (search_data.output == nil) then
+    minetest.log("error", "[Recipes] ignore to search recipe by output without outputs.")
+    return found_recipes;
+  end
+  
+  local search_inputs = search_data.output;
+  
+  for keyA, category in pairs(search_data.categories) do
+    local category_recipes = recipes.recipes[category] or {};
+    for keyB, recipe in pairs(category_recipes) do
+      -- minetest.log("warning", "Compare with recipe: "..recipe.category)
+      if (compare_recipe_output(search_data.output, recipe.output)==true) then
+        table.insert(found_recipes, recipe)
       end
     end
   end
@@ -266,18 +315,21 @@ function recipes.inventory_from_table(inventory, list_name, inventory_table)
   local inventory_size = inventory:get_size(list_name);
   local inventory_width = inventory:get_width(list_name);
   
-  local row_index = 1;
-  local column_index = 1;
+  --minetest.log("warning", "inv size: "..tostring(inventory_size).." inv width: "..tostring(inventory_width))
+  --minetest.log("warning", "table width: "..tostring(#inventory_table).." table columns: "..tostring(#inventory_table[1]))
   
-  for item_index = 1, inventory_size, 1 do
-    local item = inventory_table[row_index][column_index];
-    
-    inventory:set_stack(list_name, item_index, item);
-    
-    column_index = column_index + 1;
-    if (column_index>inventory_width) then
-      column_index = 0;
-      row_index = row_index + 1;
+  --minetest.log("warning", dump(inventory_table))
+  
+  for row_index = 1,#inventory_table do
+    local inventory_row = inventory_table[row_index];
+    for column_index = 1,#inventory_row do
+      local stack_index = ((row_index-1)*inventory_width)+column_index;
+      --minetest.log("warning", "row: "..tostring(row_index).." column: "..tostring(column_index).." stack: "..tostring(stack_index))
+      if (stack_index<=inventory_size) then
+        local item = inventory_table[row_index][column_index];
+        
+        inventory:set_stack(list_name, stack_index, item);
+      end
     end
   end
 end
@@ -332,20 +384,32 @@ function recipes.create_inventory_from_output(output)
 end
 
 function recipes.get_tool_use(recipe, wielded_name, progress_list)
-  local use_tool = {tool_power = 0, progress_index = 0};
+  local use_tool = {tool_power = 0, add_wear = 0, progress_index = 0};
   
-  local function create_use_tool(wielded_name, work_name, work_data, index)
+  local function get_tool_work(wielded_name, work_name)
+    local tool_work = {
+        power = minetest.get_item_group(wielded_name, work_name),
+        maxlevel = minetest.get_item_group(wielded_name, work_name.."_maxlevel"),
+        uses  = minetest.get_item_group(wielded_name, work_name.."_uses"),
+      };
+    minetest.log("warning", "Tool work "..work_name..": "..dump(tool_work));
+    return tool_work;
+  end;
+  
+  local function create_use_tool(tool_work, work_data, index)
     local use_tool = {tool_power = 0, progress_index = 0};
     
-    local tool_maxlevel  = minetest.get_item_group(wielded_name, work_name.."_maxlevel");
     use_tool.progress_index = index;
-      
-      local leveldiff = tool_maxlevel - work_data.level;
+    
+    local leveldiff = tool_work.maxlevel - work_data.level;
     
     if (leveldiff>=0) then
-      local tool_uses  = minetest.get_item_group(wielded_name, work_name.."_uses");
-      use_tool.tool_power  = minetest.get_item_group(wielded_name, work_name);
-      use_tool.tool_add_wear = (65535/(tool_uses*(3^leveldiff)))*work_data.wear;
+      use_tool.tool_power  = tool_work.power;
+      if (tool_work.uses>0) then
+        use_tool.tool_add_wear = (65535/(tool_work.uses*(3^leveldiff)))*work_data.wear;
+      else
+        use_tool.tool_add_wear = 0;
+      end
     else
       use_tool.tool_power = 0;
       use_tool.tool_add_wear = 0;
@@ -360,18 +424,18 @@ function recipes.get_tool_use(recipe, wielded_name, progress_list)
     for index, work_table in pairs(recipe.manual) do
       if (progress_list[index]>0) then
         local work_name, work_data = next(work_table, nil);
-        return create_use_tool(wielded_name, work_name, work_data, index);
+        local tool_work = get_tool_work(wielded_name, work_name);
+        return create_use_tool(tool_work, work_data, index);
       end
     end
   else
     for index, work_table in pairs(recipe.manual) do
       if (progress_list[index]>0) then
         local work_name, work_data = next(work_table, nil);
-        local tool_power = minetest.get_item_group(wielded_name, work_name);
-        local tool_maxlevel = minetest.get_item_group(wielded_name, work_name.."_maxlevel");
+        local tool_work = get_tool_work(wielded_name, work_name);
         --minetest.log("warning", "Power: "..tostring(tool_power).." maxlevel: "..tostring(tool_maxlevel).." Work "..work_name..": "..dump(work_data))
-        if ((tool_power>0) and (tool_maxlevel>=work_data.level)) then
-          return create_use_tool(wielded_name, work_name, work_data, index);
+        if ((tool_work.power>0) and (tool_work.maxlevel>=work_data.level)) then
+          return create_use_tool(tool_work, work_data, index);
         end
       end
     end

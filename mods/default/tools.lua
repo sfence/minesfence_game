@@ -14,10 +14,13 @@ minetest.register_item(":", {
 		groupcaps = {
 			crumbly = {times={[2]=20.00, [3]=7.00}, uses=0, maxlevel=1},
 			snappy = {times={[3]=4.00}, uses=0, maxlevel=1},
-			oddly_breakable_by_hand = {times={[1]=3.50,[2]=2.00,[3]=0.70}, uses=0}
+			oddly_breakable_by_hand = {times={[1]=3.50,[2]=2.00,[3]=0.70}, uses=0,      },
+      --hand_work = {times={[3]=0.70}, uses=0, maxlevel=1}
 		},
 		damage_groups = {fleshy=1},
-	}
+	},
+  groups = {hand_work = 2, hand_work_uses = 0,
+            hand_work_maxlevel = 2},
 })
 
 --

@@ -15,6 +15,7 @@ minetest.register_tool("stone_age:ship_stone_hard", {
 		max_drop_level=0,
 		groupcaps={
 			choppy = {times={[2]=15.2, [3]=2.60}, uses=12, maxlevel=1},
+			rough_chip = {times={[2]=15.2, [3]=2.60}, uses=50, maxlevel=2},
 		},
 		damage_groups = {fleshy=1},
 	},

@@ -252,6 +252,29 @@ minetest.register_node("default:stone", {
 	sounds = default.node_sound_stone_defaults(),
 })
 
+default.register_solid_rock("default:my_stone", {
+	description = S("My stone"),
+	tiles = {"default_stone.png"},
+	groups = {cracky = 3, stone = 1},
+	--drop = "default:cobble",
+	legacy_mineral = true,
+	sounds = default.node_sound_stone_defaults(),
+},{
+  groups_solid_stone={dry={firmness=3,resilience=3,cavein=25,absorbing_power=1},
+                      damp={firmness=3,resilience=2,cavein=35,absorbing_power=1},
+                      wet={firmness=3,resilience=1,cavein=45,absorbing_power=1},
+                      soggy={firmness=2,resilience=1, cavein=55,absorbing_power=1}},
+  groups_big_stones={dry={landslide=75,absorbing_power=1},
+                      damp={landslide=80,absorbing_power=1},
+                      wet={landslide=85,absorbing_power=1},
+                      soggy={landslide=90,absorbing_power=1}},
+  groups_medium_stones={dry={landslide=90,absorbing_power=1},
+                      damp={landslide=93,absorbing_power=1},
+                      wet={landslide=96,absorbing_power=1},
+                      soggy={landslide=99,absorbing_power=1}},
+})
+
+
 minetest.register_node("default:cobble", {
 	description = S("Cobblestone"),
 	tiles = {"default_cobble.png"},

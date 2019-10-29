@@ -1,0 +1,24 @@
+Groups
+
+firmness -> define building without support full stability distance (0-4)
+resilience -> define building size of risk falling distance (0-4)
+cavein -> define risk of cane-in effect when fall (0-100)
+landslide -> define chance of creating mound when falling instead of column
+
+damp -> 
+wet ->
+soggy -> 
+absorbing_power -> chance for changing between damp, wet, soggym chance for water spring
+capillarity -> 
+flow_through -> chance for water/liquid to flow through to air
+
+erosion_air -> risk of erosion when is on air
+erosion_water -> risk of erosion when is in contact with water
+erosion_heat -> risk of erosion by heat difference
+erosion_dry -> risk of erosion by dry out (by fire, etc)
+erosion_wet -> risk of erosion when is wet
+
+flora_plant -> for plant grow calling
+flora_tree_plant -> for plant grow calling with longer period/chance then for flora_plant
+flora_stump -> for tree grow calling
+
