@@ -49,6 +49,7 @@ local default_path = minetest.get_modpath("default")
 dofile(default_path.."/changeable.lua")
 dofile(default_path.."/rock.lua")
 dofile(default_path.."/wet.lua")
+dofile(default_path.."/erosion.lua")
 dofile(default_path.."/firmness.lua")
 dofile(default_path.."/ores.lua")
 

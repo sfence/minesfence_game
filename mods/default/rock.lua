@@ -71,8 +71,8 @@ function default.register_solid_rock(rock_name, rock_def, changes_def)
   
   for index, value in pairs({"","_damp","_wet","_soggy"}) do
     for change_index, change_name in pairs({"smash","erosion"}) do
-      default.register_changeable_node_change(rock_name..value, change_name, {new_node_name=big_stones_name..value,check_stability=yes});
-      default.register_changeable_node_change(big_stones_name..value, change_name, {new_node_name=medium_stones_name..value,check_stability=yes});
+      default.register_changeable_node_change((rock_name..value), change_name, {new_node_name=big_stones_name..value,check_stability=true});
+      default.register_changeable_node_change((big_stones_name..value), change_name, {new_node_name=medium_stones_name..value,check_stability=true});
     end
   end
 end
@@ -96,9 +96,7 @@ function default.register_wet_rock(rock_name, rock_def, groups)
   copy_def = groups_to_def(copy_def, groups.dry);
   copy_def = update_node_def(copy_def);
   minetest.register_node(dry_name, copy_def);
-  
-  default.register_changeable_node_change(dry_name, "wet", {new_node_name=damp_name,check_stability=false});
-  
+   
   -- damp
   copy_def = table.copy(rock_def);
   copy_def = update_tiles(copy_def, "default_damp.png");
@@ -108,9 +106,6 @@ function default.register_wet_rock(rock_name, rock_def, groups)
   copy_def = update_node_def(copy_def);
   minetest.register_node(damp_name, copy_def);
   
-  default.register_changeable_node_change(damp_name, "wet", {new_node_name=wet_name,check_stability=false});
-  default.register_changeable_node_change(damp_name, "dry", {new_node_name=dry_name,check_stability=false});
-  
   -- wet
   copy_def = table.copy(rock_def);
   copy_def = update_tiles(copy_def, "default_wet.png");
@@ -119,10 +114,7 @@ function default.register_wet_rock(rock_name, rock_def, groups)
   copy_def.groups.wet = 1;
   copy_def = update_node_def(copy_def);
   minetest.register_node(wet_name, copy_def);
-  
-  default.register_changeable_node_change(wet_name, "wet", {new_node_name=soggy_name,check_stability=false});
-  default.register_changeable_node_change(wet_name, "dry", {new_node_name=damp_name,check_stability=false});
-  
+   
   -- soggy
   copy_def = table.copy(rock_def);
   copy_def = update_tiles(copy_def, "default_soggy.png");
@@ -131,7 +123,15 @@ function default.register_wet_rock(rock_name, rock_def, groups)
   copy_def.groups.soggy = 1;
   copy_def = update_node_def(copy_def);
   minetest.register_node(soggy_name, copy_def);
-
+  
+  -- changeable register
+  default.register_changeable_node_change(dry_name, "wet", {new_node_name=damp_name,check_stability=false});
+  
+  default.register_changeable_node_change(damp_name, "wet", {new_node_name=wet_name,check_stability=false});
+  default.register_changeable_node_change(damp_name, "dry", {new_node_name=dry_name,check_stability=false});
+  
+  default.register_changeable_node_change(wet_name, "wet", {new_node_name=soggy_name,check_stability=false});
+  default.register_changeable_node_change(wet_name, "dry", {new_node_name=damp_name,check_stability=false});
   default.register_changeable_node_change(soggy_name, "dry", {new_node_name=wet_name,check_stability=false});
 end
 

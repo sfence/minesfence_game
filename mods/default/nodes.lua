@@ -260,7 +260,7 @@ default.register_solid_rock("default:my_stone", {
 	legacy_mineral = true,
 	sounds = default.node_sound_stone_defaults(),
 },{
-  groups_solid_stone={dry={firmness=3,resilience=3,cavein=25,absorbing_power=1},
+  groups_solid_stone={dry={firmness=3,resilience=3,cavein=25,absorbing_power=1,erosion_air=10},
                       damp={firmness=3,resilience=2,cavein=35,absorbing_power=1},
                       wet={firmness=3,resilience=1,cavein=45,absorbing_power=1},
                       soggy={firmness=2,resilience=1, cavein=55,absorbing_power=1}},
@@ -546,7 +546,7 @@ minetest.register_node("default:dirt_with_coniferous_litter", {
 minetest.register_node("default:dry_dirt", {
 	description = S("Dry Dirt"),
 	tiles = {"default_dry_dirt.png"},
-	groups = {crumbly = 3, falling_node, soil = 1},
+	groups = {crumbly = 3, falling_node=1, soil = 1},
 	drowning = 1,
 	sounds = default.node_sound_dirt_defaults(),
 })
@@ -556,7 +556,7 @@ minetest.register_node("default:dry_dirt_with_dry_grass", {
 	tiles = {"default_dry_grass.png", "default_dry_dirt.png",
 		{name = "default_dry_dirt.png^default_dry_grass_side.png",
 			tileable_vertical = false}},
-	groups = {crumbly = 3, falling, soil = 1},
+	groups = {crumbly = 3, falling_node=1, soil = 1},
 	drowning = 1,
 	drop = "default:dry_dirt",
 	sounds = default.node_sound_dirt_defaults({

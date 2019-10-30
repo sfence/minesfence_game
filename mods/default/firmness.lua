@@ -69,11 +69,7 @@ function default.is_should_fall(pos, node, only_firmness, to_stable)
               --minetest.log("warning", "Walkable on "..dump(pos_find).." for "..dump(pos))
               is_should_fall = false;
               if (to_stable==true) then
-                node.name = default.firmness_node_to_stable[node.name]; 
-                if (node.name) then
-                  --minetest.log("warning", "To stable "..dump(pos))
-                  minetest.swap_node(pos, node);
-                end
+                default.apply_node_change(pos, node, "stabilization");
               end
               return false;
             end
@@ -317,13 +313,17 @@ function default.check_for_landslide(pos)
             if (node_def.buildable_to==true) then
               check_pos.y = pos.y - 1;
               
-              local check_node = minetest.get_node(check_pos);
-              if (check_node.name~="ignore") then
-                local node_def = minetest.registered_nodes[check_node.name];
-                
-                if (node_def.buildable_to==true) then
-                  table.insert(landslide_pos, table.copy(check_pos))
+              if (landslide<=100) then
+                local check_node = minetest.get_node(check_pos);
+                if (check_node.name~="ignore") then
+                  local node_def = minetest.registered_nodes[check_node.name];
+                  
+                  if (node_def.buildable_to==true) then
+                    table.insert(landslide_pos, table.copy(check_pos))
+                  end
                 end
+              else
+                table.insert(landslide_pos, table.copy(check_pos))
               end
             end
           end
@@ -335,7 +335,7 @@ function default.check_for_landslide(pos)
     local positions = #landslide_pos;
     if (positions>0) then
       local chance = (default.random_generator:next(0, 65535)/65535.0)*100;      
-      
+      if (landslide>100) then landslide = landslide - 100; end
       --minetest.log("warning", "Chance: "..tostring(chance).." Landslide: "..tostring(landslide));
       
       if (chance<=landslide) then
@@ -351,6 +351,7 @@ function default.check_for_landslide(pos)
         minetest.set_node(move_pos, node);
         minetest.remove_node(pos);
         minetest.check_single_for_falling(move_pos);
+        minetest.check_for_falling(pos);
       end
     end
   end
@@ -384,6 +385,7 @@ default.firmness_node_stable_names = {};
 
 function default.fall_stable_node(pos, node, check_cavein)
   --minetest.log("warning", "fall_stable_node.");
+  default.apply_node_change(pos, node, "smash");
   local new_node_name = default.firmness_node_to_falling[node.name];
   if (new_node_name~=nil) then
     --minetest.log("warning", "Falling 296: "..dump(pos));
@@ -426,6 +428,10 @@ function default.register_firmness_node_change(node_name, falling_node_name, sta
     default.firmness_node_from_stable[stable_node_name] = node_name;
     table.insert(default.firmness_node_stable_names, stable_node_name);
   end
+end
+
+function default.firmness_construct(pos)
+  minetest.after(0.1, default.check_for_landslide, pos);
 end
 
 function default.firmness_abm_action(pos, node)
@@ -508,4 +514,5 @@ minetest.register_abm({
   chance = 6,
   catch_up = false,
   action = default.firmness_abm_action,
-})
+}
+)
