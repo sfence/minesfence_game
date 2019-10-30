@@ -1,4 +1,6 @@
 
+local S = default.S;
+
 --
 -- Changeable nodes
 --
