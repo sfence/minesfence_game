@@ -37,8 +37,8 @@ local function text_item_to_table_item(recipe_item_text)
   end
   
   if (item_number) then
-    number_begin = string.sub(recipe_item_text, item_number, item_number);
-    if ((number_item~="+") and (number_item~="-")) then
+    local number_begin = string.sub(recipe_item_text, item_number, item_number);
+    if ((number_begin~="+") and (number_begin~="-")) then
       recipe_item_table.items_count = tonumber(string.sub(recipe_item_text, item_number));
     else
       recipe_item_table.tool_wear = tonumber(string.sub(recipe_item_text, item_number));
@@ -79,7 +79,7 @@ function recipes.register_recipe(recipe_data)
   if (recipes.recipes[recipe_data.category] == nil) then
     recipes.recipes[recipe_data.category] = {}
   end
-  recipe_data_copy = table.copy(recipe_data);
+  local recipe_data_copy = table.copy(recipe_data);
   
   -- recipe reformat some data
   for row_index, row_data in pairs(recipe_data_copy.input) do

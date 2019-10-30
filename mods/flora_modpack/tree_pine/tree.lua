@@ -268,7 +268,6 @@ minetest.register_node("tree_pine:pine_sapling", {
 	paramtype = "light",
 	sunlight_propagates = true,
 	walkable = false,
-	on_timer = grow_sapling,
 	selection_box = {
 		type = "fixed",
 		fixed = {-4 / 16, -0.5, -4 / 16, 4 / 16, 7 / 16, 4 / 16}
