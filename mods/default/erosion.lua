@@ -24,6 +24,29 @@ function default.erosion_air(pos, node)
   end
 end
 
+function default.erosion_wind(pos, node)
+  --minetest.log("warning", "Wind erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
+  
+  local positions = default.shared_positions_in_sphere(pos, 1, false);
+  local erosion_chance = 0.0;
+  
+  local erosion_wind = minetest.get_item_group(node.name, "erosion_wind")/100.0;
+  
+  for check_index,check_pos in pairs(positions) do
+    check_node = minetest.get_node(check_pos);
+    if ((check_node.name=="air") or (minetest.get_item_group(check_node.name, "air")>0)) then
+      erosion_chance = default.shared_add_chance_happen(erosion_chance, erosion_air);
+    end
+  end
+  
+  local chance = default.random_generator:next(0, 16777215)/16777215.0;
+  minetest.log("warning", "Wind erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(erosion_chance))
+  
+  if (chance<=erosion_chance) then
+    default.apply_node_change(pos, node, "erosion");
+  end
+end
+
 function default.erosion_water(pos, node)
   minetest.log("warning", "Water erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
   
