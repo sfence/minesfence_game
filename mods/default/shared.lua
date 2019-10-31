@@ -124,10 +124,10 @@ function default.shared_positions_with_distance_in_sphere(pos, distance, include
 end
 
 function default.shared_add_chance_happen(chance_happen, add_happen_chance)
-  return (1.0-((1.0-chance_happen)*(1.0-add_happen_chance));
+  return (1.0-((1.0-chance_happen)*(1.0-add_happen_chance)));
 end
 
 function default.shared_add_chance_no_happen(chance_happen, add_no_happen_chance)
-  return (1.0-((1.0-chance_happen)*add_no_happen_chance);
+  return (1.0-((1.0-chance_happen)*add_no_happen_chance));
 end
 

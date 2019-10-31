@@ -70,7 +70,7 @@ function default.apply_node_change(pos, node, change_name)
     node = minetest.get_node(pos);
   end
   
-  changeable_node = default.registered_changeable_nodes[node.name];
+  local changeable_node = default.registered_changeable_nodes[node.name];
   
   --minetest.log("warning", "Node "..node.name.." change "..change_name.." with data: "..dump(changeable_node))
   --minetest.log("warning", dump(default.registered_changeable_nodes))

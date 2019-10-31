@@ -600,11 +600,12 @@ minetest.register_node("default:sand", {
 	drop = {
 		max_items = 2,
 		items = {
+			{items = {"default:sand"},
 			{items = {"default:flint"}, rarity = 1024},
 			{items = {"default:stone_soft"}, rarity = 768},
 			{items = {"default:stone_hard"}, rarity = 635},
 			{items = {"default:stone_flat"}, rarity = 154},
-			{items = {"default:sand"}}
+      }
 		}
 	}
 })
@@ -618,11 +619,12 @@ minetest.register_node("default:desert_sand", {
 	drop = {
 		max_items = 2,
 		items = {
+			{items = {"default:desert_sand"},
 			{items = {"default:flint"}, rarity = 1024},
 			{items = {"default:stone_soft"}, rarity = 768},
 			{items = {"default:stone_hard"}, rarity = 635},
 			{items = {"default:stone_flat"}, rarity = 154},
-			{items = {"default:desert_sand"}}
+      }
 		}
 	}
 })
@@ -636,11 +638,12 @@ minetest.register_node("default:silver_sand", {
 	drop = {
 		max_items = 2,
 		items = {
+			{items = {"default:silver_sand"},
 			{items = {"default:flint"}, rarity = 1024},
 			{items = {"default:stone_soft"}, rarity = 768},
 			{items = {"default:stone_hard"}, rarity = 635},
 			{items = {"default:stone_flat"}, rarity = 154},
-			{items = {"default:silver_sand"}}
+      }
 		}
 	}
 })
@@ -655,11 +658,12 @@ minetest.register_node("default:gravel", {
 	drop = {
 		max_items = 2,
 		items = {
+			{items = {"default:gravel"},
 			{items = {"default:flint"}, rarity = 128},
 			{items = {"default:stone_soft"}, rarity = 64},
 			{items = {"default:stone_hard"}, rarity = 32},
 			{items = {"default:stone_flat"}, rarity = 256},
-			{items = {"default:gravel"}}
+      }
 		}
 	}
 })

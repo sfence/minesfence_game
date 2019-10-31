@@ -2,7 +2,7 @@
 local S = default.S;
 
 function default.erosion_air(pos, node)
-  minetest.log("warning", "Air erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
+  --minetest.log("warning", "Air erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
   
   local positions = default.shared_positions_in_sphere(pos, 1, false);
   local erosion_chance = 0.0;
@@ -17,6 +17,7 @@ function default.erosion_air(pos, node)
   end
   
   local chance = default.random_generator:next(0, 16777215)/16777215.0;
+  minetest.log("warning", "Air erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(erosion_chance))
   
   if (chance<=erosion_chance) then
     default.apply_node_change(pos, node, "erosion");
