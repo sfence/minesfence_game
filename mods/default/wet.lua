@@ -64,43 +64,44 @@ function default.wet_more_wet(pos, node)
   end
 end
 
-function default.wet_more_dry(pos, node)
-  --minetest.log("warning", "Dry of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
+function default.wet_create_spring(pos, node)
+  --minetest.log("warning", "Create spring on node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
   local positions = default.shared_positions_in_sphere(pos, 1, false);
-  local dry_chance = 0.0;
+  local desiccation_chance = 0.0;
   
   local desiccation = minetest.get_item_group(node.name, "desiccation")/100.0;
+  local dry_positions = {};
   
   for check_index,check_pos in pairs(positions) do
     local check_node = minetest.get_node(check_pos);
-    local desiccation_part = 1.0;
-    if (minetest.get_item_group(check_node.name, "water")>0) then
-      local check_def = minetest.registered_nodes[check_node.name];
-      if (check_def.liquidtype=="flowing") then
-        desiccation_part = desiccation_part - 0.1 * (minetest.get_node_level(check_pos)/minetest.get_node_max_level(check_pos));
-      else
-        dry_chance = 0.0;
-        break;
-      end
-    elseif (minetest.get_item_group(node.name, "damp")>0) then
-      desiccation_part = desiccation_part - 0.225; --0.25 * 0.9;
-    elseif (minetest.get_item_group(node.name, "wet")>0) then
-      desiccation_part = desiccation_part - 0.45; -- 0.50 * 0.9;
-    elseif (minetest.get_item_group(node.name, "soggy")>0) then
-      desiccation_part = desiccation_part - 0.675; -- 0.75 * 0.9;
-    end
-    
-    if (desiccation_part>0.0) then
-      dry_chance = default.shared_add_chance_happen(dry_chance, desiccation_part*desiccation);
+    local desiccation = minetest.get_item_group(check_node.name, "desiccation")/100.0;
+    if (desiccation>0) then
+      table.insert(dry_positions, check_pos);
+      
+      desiccation_chance = default.shared_add_chance_happen(desiccation_chance, desiccation);
     end
   end
   
-  minetest.log("warning", "Dry of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(dry_chance));
+  minetest.log("warning", "Create spring on node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(desiccation_chance));
   
   local chance = default.random_generator:next(0, 16777215)/16777215.0;
   
-  if (chance<=dry_chance) then
-    default.apply_node_change(pos, node, "dry");
+  if (chance<=desiccation_chance) then
+    local fresh_def = minetest.registered_nodes["default:fresh_water_flowing"];
+    local leveled = fresh_def.leveled;
+    local create_level = math.floor(chance/(desiccation_chance/(leveled+1)));
+    if (create_level>0) then
+      minetest.set_node(pos, {name="default:fresh_water_flowing"});
+      if (create_level>leveled) then
+        create_level = leveled;
+      end
+      minetest.set_node_level(pos, create_level);
+    else
+      minetest.set_node(pos, {name="default:spring_water_source"});
+    end
+    for dry_index,dry_pos in pairs(dry_positions) do 
+      default.apply_node_change(dry_pos, nil, "dry");
+    end
   end
 end
 
@@ -115,9 +116,9 @@ minetest.register_abm({
 })
 
 minetest.register_abm({
-  label = "Dry of wet",
-  nodenames = {"group:desiccation"},
-  neighbors = {"group:air","air"},
+  label = "Create spring",
+  nodenames = {"group:air","air"},
+  neighbors = {"group:desiccation"},
   interval = 110,
   chance = 110,
   catch_up = false,
