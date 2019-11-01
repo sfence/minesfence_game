@@ -42,6 +42,7 @@ function default.is_should_fall(pos, node, only_firmness, to_stable)
   end
   
   local pos_distance = table.copy(pos_find);
+  local no_in_air = false;
   
   if (firmness>0) then
     for x_diff = -firmness,firmness,1 do
@@ -68,6 +69,9 @@ function default.is_should_fall(pos, node, only_firmness, to_stable)
             if ((node_walkable==true) and (falling_node==0)) then
               --minetest.log("warning", "Walkable on "..dump(pos_find).." for "..dump(pos))
               is_should_fall = false;
+              if (distance<2.0) then
+                no_in_air = true;
+              end
               if (to_stable==true) then
                 default.apply_node_change(pos, node, "stabilization");
               end
@@ -78,6 +82,10 @@ function default.is_should_fall(pos, node, only_firmness, to_stable)
       end
       if (is_should_fall==false) then break; end
     end
+  end
+  
+  if (no_in_air==false) then
+    return true;
   end
   
   if ((is_should_fall==true) and (resilience>0) and (only_firmness==false)) then

@@ -8,7 +8,8 @@ landslide -> define chance of creating mound when falling instead of column
 damp -> 
 wet ->
 soggy -> 
-absorbing_power -> chance for changing between damp, wet, soggym chance for water spring
+absorbing_power -> chance for changing to more wet
+desiccation -> chance of changing to more dry
 capillarity -> 
 flow_through -> chance for water/liquid to flow through to air
 

@@ -95,6 +95,7 @@ function default.register_wet_rock(rock_name, rock_def, groups)
   copy_def = table.copy(rock_def);
   copy_def = groups_to_def(copy_def, groups.dry);
   copy_def = update_node_def(copy_def);
+  copy_def.groups.dry = 1;
   minetest.register_node(dry_name, copy_def);
    
   -- damp

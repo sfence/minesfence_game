@@ -131,3 +131,23 @@ function default.shared_add_chance_no_happen(chance_happen, add_no_happen_chance
   return (1.0-((1.0-chance_happen)*add_no_happen_chance));
 end
 
+function default.shared_random_from_table(table_data, points_field_name)
+  -- sum of points
+  local sum_points = 0;
+  for index,value in pairs(table_data) do
+    sum_points = sum_points + value[points_field_name];
+  end
+  
+  -- select field
+  local rand_points = default.random_generator:next(0, sum_points);
+  for index,value in pairs(table_data) do
+    rand_points = rand_points - value[points_field_name];
+    if (rand_points<=0) then
+      return value;
+    end
+  end
+  
+  -- no select
+  return nil;
+end
+
