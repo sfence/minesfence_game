@@ -514,13 +514,15 @@ function default.register_node_with_firmness(node_def, settings)
   end
 end
 
-minetest.register_abm({
-  label = "Check Firmness",
-  nodenames = {"group:firmness"},
-  neighbors = {"group:air","group:water","air"},
-  interval = 20,
-  chance = 6,
-  catch_up = false,
-  action = default.firmness_abm_action,
-}
-)
+if (false) then
+  minetest.register_abm({
+    label = "Check Firmness",
+    nodenames = {"group:firmness"},
+    neighbors = {"group:air","group:water","air"},
+    interval = 20,
+    chance = 6,
+    catch_up = false,
+    action = default.firmness_abm_action,
+  })
+end
+

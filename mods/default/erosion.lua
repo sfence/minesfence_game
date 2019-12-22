@@ -4,20 +4,20 @@ local S = default.S;
 function default.erosion_air(pos, node)
   --minetest.log("warning", "Air erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
   
-  local positions = default.shared_positions_in_sphere(pos, 1, false);
+  local positions = default.shared_positions_in_sphere(pos, 1, 1, false);
   local erosion_chance = 0.0;
   
   local erosion_air = minetest.get_item_group(node.name, "erosion_air")/100.0;
   
   for check_index,check_pos in pairs(positions) do
-    check_node = minetest.get_node(check_pos);
+    local check_node = minetest.get_node(check_pos);
     if ((check_node.name=="air") or (minetest.get_item_group(check_node.name, "air")>0)) then
       erosion_chance = default.shared_add_chance_happen(erosion_chance, erosion_air);
     end
   end
   
   local chance = default.random_generator:next(0, 16777215)/16777215.0;
-  minetest.log("warning", "Air erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(erosion_chance))
+  --minetest.log("warning", "Air erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(erosion_chance))
   
   if (chance<=erosion_chance) then
     default.apply_node_change(pos, node, "erosion");
@@ -27,7 +27,7 @@ end
 function default.erosion_wind(pos, node)
   --minetest.log("warning", "Wind erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
   
-  local positions = default.shared_positions_in_sphere(pos, 1, false);
+  local positions = default.shared_positions_in_sphere(pos, 1, 1, false);
   local erosion_chance = 0.0;
   
   local erosion_wind = minetest.get_item_group(node.name, "erosion_wind")/100.0;
@@ -50,7 +50,7 @@ end
 function default.erosion_water(pos, node)
   minetest.log("warning", "Water erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
   
-  local positions = default.shared_positions_in_sphere(pos, 1, false);
+  local positions = default.shared_positions_in_sphere(pos, 1, 1, false);
   local erosion_chance = 0.0;
   
   local erosion_water = minetest.get_item_group(node.name, "erosion_water")/100.0;
@@ -75,12 +75,12 @@ function default.erosion_water(pos, node)
 end
 
 function default.erosion_heat(pos, node)
-  minetest.log("warning", "Heat erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
+  --minetest.log("warning", "Heat erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
   default.apply_node_change(pos, node, "erosion");
 end
 
 function default.erosion_dry(pos, node)
-  minetest.log("warning", "Dry erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
+  --minetest.log("warning", "Dry erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
   
   local erosion_chance = 0.0;
   
@@ -98,9 +98,9 @@ function default.erosion_dry(pos, node)
 end
 
 function default.erosion_wet(pos, node)
-  minetest.log("warning", "Wet erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
+  --minetest.log("warning", "Wet erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
   
-  local positions = default.shared_positions_in_sphere(pos, 1, false);
+  local positions = default.shared_positions_in_sphere(pos, 1, 1, false);
   local erosion_chance = 0.0;
   
   local erosion_wet = minetest.get_item_group(node.name, "erosion_wet")/100.0;
@@ -127,49 +127,76 @@ function default.erosion_wet(pos, node)
   end
 end
 
-minetest.register_abm({
-  label = "Air erosion",
-  nodenames = {"group:erosion_air"},
-  neighbors = {"group:air","air"},
-  interval = 60,
-  chance = 2,
-  catch_up = false,
-  action = default.erosion_air,
-})
+function default.erosion_drying(pos, node)
+  --minetest.log("warning", "Drying erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
+  
+  local erosion_chance = minetest.get_item_group(node.name, "erosion_drying")/10000.0;
+  
+  local chance = default.random_generator:next(0, 16777215)/16777215.0;
+  
+  if (chance<=erosion_chance) then
+    default.apply_node_change(pos, node, "erosion");
+  end
+end
 
-minetest.register_abm({
-  label = "Water erosion",
-  nodenames = {"group:erosion_water"},
-  neighbors = {"group:water"},
-  interval = 60,
-  chance = 2,
-  catch_up = false,
-  action = default.erosion_water,
-})
+function default.erosion_wetting(pos, node)
+  --minetest.log("warning", "Weting erosion of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
+  
+  local erosion_chance = minetest.get_item_group(node.name, "erosion_wetting")/10000.0;
+  
+  local chance = default.random_generator:next(0, 16777215)/16777215.0;
+  
+  if (chance<=erosion_chance) then
+    default.apply_node_change(pos, node, "erosion");
+  end
+end
 
-minetest.register_abm({
-  label = "Heat erosion",
-  nodenames = {"group:erosion_heat"},
-  interval = 60,
-  chance = 2,
-  catch_up = false,
-  action = default.erosion_heat,
-})
+if (false) then
+  minetest.register_abm({
+    label = "Air erosion",
+    nodenames = {"group:erosion_air"},
+    neighbors = {"group:air","air"},
+    interval = 60,
+    chance = 2,
+    catch_up = false,
+    action = default.erosion_air,
+  })
 
-minetest.register_abm({
-  label = "Dry erosion",
-  nodenames = {"group:erosion_dry"},
-  interval = 60,
-  chance = 2,
-  catch_up = false,
-  action = default.erosion_dry,
-})
+  minetest.register_abm({
+    label = "Water erosion",
+    nodenames = {"group:erosion_water"},
+    neighbors = {"group:water"},
+    interval = 60,
+    chance = 2,
+    catch_up = false,
+    action = default.erosion_water,
+  })
 
-minetest.register_abm({
-  label = "Wet erosion",
-  nodenames = {"group:erosion_wet"},
-  interval = 60,
-  chance = 2,
-  catch_up = false,
-  action = default.erosion_wet,
-})
+  minetest.register_abm({
+    label = "Heat erosion",
+    nodenames = {"group:erosion_heat"},
+    interval = 60,
+    chance = 2,
+    catch_up = false,
+    action = default.erosion_heat,
+  })
+
+  minetest.register_abm({
+    label = "Dry erosion",
+    nodenames = {"group:erosion_dry"},
+    interval = 60,
+    chance = 2,
+    catch_up = false,
+    action = default.erosion_dry,
+  })
+
+  minetest.register_abm({
+    label = "Wet erosion",
+    nodenames = {"group:erosion_wet"},
+    interval = 60,
+    chance = 2,
+    catch_up = false,
+    action = default.erosion_wet,
+  })
+end
+

@@ -53,6 +53,8 @@ dofile(default_path.."/rock.lua")
 dofile(default_path.."/wet.lua")
 dofile(default_path.."/erosion.lua")
 dofile(default_path.."/firmness.lua")
+dofile(default_path.."/washaway.lua")
+dofile(default_path.."/water.lua")
 dofile(default_path.."/ores.lua")
 
 dofile(default_path.."/functions.lua")

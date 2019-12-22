@@ -18,6 +18,10 @@ erosion_water -> risk of erosion when is in contact with water
 erosion_heat -> risk of erosion by heat difference
 erosion_dry -> risk of erosion by dry out (by fire, etc)
 erosion_wet -> risk of erosion when is wet
+erosion_wetting -> risk of erosion when getting more wet
+erosion_drying -> risk of erosion when getting more dry
+
+washaway -> risk of washaway of falling node by water
 
 flora_plant -> for plant grow calling
 flora_tree_plant -> for plant grow calling with longer period/chance then for flora_plant

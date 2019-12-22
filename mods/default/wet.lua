@@ -4,7 +4,7 @@ local S = default.S;
 function default.wet_more_wet(pos, node)
   --minetest.log("warning", "Wet of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
   
-  local positions = default.shared_positions_in_sphere(pos, 1, false);
+  local positions = default.shared_positions_in_sphere(pos, 1, 1, false);
   local wet_chance = 0.0;
   
   local absorbing_power = minetest.get_item_group(node.name, "absorbing_power")/100.0;
@@ -34,13 +34,13 @@ function default.wet_more_wet(pos, node)
       end
     elseif (minetest.get_item_group(check_node.name, "damp")>0) then
       absorbing_part = 0.083; --0.25 * 0.33;
-      table.insert(wet_from, {pos=check_pos,points=math.ceil(83*height_coeficient)})
+      table.insert(wet_from, {pos=check_pos,node=check_node,points=math.ceil(83*height_coeficient)})
     elseif (minetest.get_item_group(check_node.name, "wet")>0) then
       absorbing_part = 0.167; -- 0.50 * 0.33;
-      table.insert(wet_from, {pos=check_pos,points=math.ceil(167*height_coeficient)})
+      table.insert(wet_from, {pos=check_pos,node=check_node,points=math.ceil(167*height_coeficient)})
     elseif (minetest.get_item_group(check_node.name, "soggy")>0) then
       absorbing_part = 0.25; -- 0.75 * 0.33;
-      table.insert(wet_from, {pos=check_pos,points=math.ceil(250*height_coeficient)})
+      table.insert(wet_from, {pos=check_pos,node=check_node,points=math.ceil(250*height_coeficient)})
     end
   
     --minetest.log("warning", "Near node "..check_node.name.." pos X:"..tostring(check_pos.x).." Y:"..tostring(check_pos.y).." Z:"..tostring(check_pos.z).." absorbing_part: "..tostring(absorbing_part).." absorbing_power: "..tostring(absorbing_power));
@@ -50,48 +50,61 @@ function default.wet_more_wet(pos, node)
     end
   end
   
-  minetest.log("warning", "Wet of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(wet_chance));
+  --minetest.log("warning", "Wet of node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(wet_chance));
   
   local chance = default.random_generator:next(0, 16777215)/16777215.0;
   
   if (chance<=wet_chance) then
     default.apply_node_change(pos, node, "wet");
     
+    default.erosion_wetting(pos, node);
+    
     if (water_near==false) then
-      from_data = default.shared_random_from_table(wet_from, "points");
-      default.apply_node_change(from_data.pos, nil, "dry");
+      local from_data = default.shared_random_from_table(wet_from, "points");
+      default.apply_node_change(from_data.pos, from_data.node, "dry");
+      
+      default.erosion_drying(from_data.pos, from_data.node);
     end
   end
 end
 
 function default.wet_create_spring(pos, node)
   --minetest.log("warning", "Create spring on node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
-  local positions = default.shared_positions_in_sphere(pos, 1, false);
+  local positions = default.shared_positions_in_sphere(pos, 1, 1, false);
   local desiccation_chance = 0.0;
   
-  local desiccation = minetest.get_item_group(node.name, "desiccation")/100.0;
   local dry_positions = {};
   
   for check_index,check_pos in pairs(positions) do
     local check_node = minetest.get_node(check_pos);
     local desiccation = minetest.get_item_group(check_node.name, "desiccation")/100.0;
+    
     if (desiccation>0) then
+      local capabilities = minetest.get_item_group(check_node.name, "capabilities")/1000.0;
+      local height_coeficient = 0.5;
+      if (check_pos.y>pos.y) then
+        height_coeficient = 1.0-capabilities;
+      elseif (check_pos.y<pos.y) then
+        height_coeficient = capabilities;
+      end
+      
       table.insert(dry_positions, check_pos);
       
-      desiccation_chance = default.shared_add_chance_happen(desiccation_chance, desiccation);
+      desiccation_chance = default.shared_add_chance_happen(desiccation_chance, height_coeficient*desiccation);
     end
   end
   
-  minetest.log("warning", "Create spring on node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(desiccation_chance));
+  --minetest.log("warning", "Create spring on node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(desiccation_chance));
   
   local chance = default.random_generator:next(0, 16777215)/16777215.0;
   
   if (chance<=desiccation_chance) then
-    local fresh_def = minetest.registered_nodes["default:fresh_water_flowing"];
-    local leveled = fresh_def.leveled;
-    local create_level = math.floor(chance/(desiccation_chance/(leveled+1)));
+    minetest.set_node(pos, {name="default:fresh_water_flowing"});
+    local leveled = minetest.get_node_max_level(pos);
+    local create_level = math.floor(chance/(desiccation_chance/(10*leveled+1)));
+    --minetest.log("warning", "Level: "..tostring(create_level).." Max level: "..tostring(leveled))
     if (create_level>0) then
-      minetest.set_node(pos, {name="default:fresh_water_flowing"});
+      create_level = math.ceil(create_level/10.0);
       if (create_level>leveled) then
         create_level = leveled;
       end
@@ -105,23 +118,44 @@ function default.wet_create_spring(pos, node)
   end
 end
 
-minetest.register_abm({
-  label = "Wet of dry",
-  nodenames = {"group:absorbing_power"},
-  neighbors = {"group:water","group:damp","group:wet","group:soggy"},
-  interval = 11,
-  chance = 2,
-  catch_up = false,
-  action = default.wet_more_wet,
-})
+function default.wet_dry_spring(pos, node)
+  --minetest.log("warning", "Dry spring on node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z))
+  minetest.set_node(pos, {name="default:fresh_water_flowing"});
+  local leveled = minetest.get_node_max_level(pos);
+  minetest.set_node_level(pos, leveled);
+  if (leveled<7) then 
+    minetest.log("error","Flwint water set leveled problem.")
+  end
+end
 
-minetest.register_abm({
-  label = "Create spring",
-  nodenames = {"group:air","air"},
-  neighbors = {"group:desiccation"},
-  interval = 110,
-  chance = 110,
-  catch_up = false,
-  action = default.wet_more_dry,
-})
+if (false) then
+  minetest.register_abm({
+    label = "Wet of dry",
+    nodenames = {"group:absorbing_power"},
+    neighbors = {"group:water","group:damp","group:wet","group:soggy"},
+    interval = 11,
+    chance = 2,
+    catch_up = false,
+    action = default.wet_more_wet,
+  })
+
+  minetest.register_abm({
+    label = "Create spring",
+    nodenames = {"group:air","air"},
+    neighbors = {"group:desiccation"},
+    interval = 11,
+    chance = 5,
+    catch_up = false,
+    action = default.wet_create_spring,
+  })
+
+  minetest.register_abm({
+    label = "Dry spring",
+    nodenames = {"default:spring_water_source"},
+    interval = 12,
+    chance = 5,
+    catch_up = false,
+    action = default.wet_dry_spring,
+  })
+end
 

@@ -112,7 +112,7 @@ minetest.register_node("farming:dry_soil_wet", {
 })
 
 minetest.override_item("default:desert_sand", {
-	groups = {crumbly=3, falling_node=1, sand=1, soil = 1},
+	groups = {crumbly=3, falling_node=1, sand=1, soil = 1, washaway = 25},
 	soil = {
 		base = "default:desert_sand",
 		dry = "farming:desert_sand_soil",
