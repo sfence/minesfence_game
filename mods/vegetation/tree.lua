@@ -75,11 +75,13 @@ end
 -- grow_points -> number of grow points added by this tree part
 --
 -- supporter -> true/false - can support grow
+-- stump -> true/false - is tree stump
 --
 -- grow_on -> table with grow cost and grow chance based on location diff x, y, z as hash by minetest.hash_node_position function
 --         -> [0, 0, 0] is supporter node
 --         -> use only 0, -1 and 1 diffs
 --         -> keep nil if part is accesable only by changes_to
+-- grow_from -> table with grow cost and grow chance for supporter node
 --
 -- changes_to -> table with tables with target_node and present definitions {target_node="targer_node", condition={}, *_presence = {}, ...} 
 --            -> table keys is used like description (grow_to, pollen_to, fertilize_to, dry_to, pest_to, rot_to, mould_to etc)
@@ -212,7 +214,8 @@ function vegetation.tree_stump_grow(pos, node, grow_points_multiplier)
     local supporter_node = minetest.get_node(supporter_pos);
     
     supporter_def = tree_def.parts[supporter_node.name];
-    if (supporter_def~=nil) then
+    if ((supporter_def~=nil) and (supporter_def.supporter==true)) then
+      minetest.log("warning", "Supporter: "..dump(supporter_node))
       for x_diff = -1,1,1 do
         check_pos.x = supporter_pos.x + x_diff;
         for y_diff = -1,1,1 do
@@ -238,6 +241,8 @@ function vegetation.tree_stump_grow(pos, node, grow_points_multiplier)
               if (check_grow_on==true) then
                 grow_variants = vegetation.tree_part_check_grow_on(grow_variants, tree_def, pos, supporter_def, check_pos, check_pos_part_size, tree_data.grow_points)
               end
+            else
+              grow_variants = vegetation.tree_part_check_grow_from(grow_variants, tree_def, pos, supporter_def, tree_data.grow_points)
             end
           end
         end
@@ -246,7 +251,7 @@ function vegetation.tree_stump_grow(pos, node, grow_points_multiplier)
   end
   
   -- grow if possible
-  minetest.log("warning", "Grow_variants: "..tostring(grow_variants))
+  minetest.log("warning", "Grow_variants: "..dump(grow_variants))
   if (#grow_variants > 0) then
     local grow_points = tree_data.grow_points;
     -- calculate sum of grow points in all variants
@@ -375,67 +380,130 @@ end
 
 function vegetation.tree_part_check_grow_on(grow_variants, tree_def, supporter_pos, supporter_def, check_pos, check_pos_part_size, max_grow_cost)
   minetest.log("warning", "Check grow of node:"..dump(check_pos));
+  minetest.log("warning", "Supporter def:"..dump(supporter_def));
   for tree_part_node_name, tree_part_def in pairs(tree_def.parts) do
     if (tree_part_def.grow_on~=nil) then
       if (    (supporter_def.size>tree_part_def.size)
           and ((supporter_def.size-tree_part_def.size)<=tree_part_def.size_diff)
           and (check_pos_part_size<tree_part_def.size)) then
+        minetest.log("warning", "Tree part "..tree_part_node_name.." def:"..dump(tree_part_def));
         for hash_pos,grow_data in pairs(tree_part_def.grow_on) do
           local grow_on_pos = minetest.get_position_from_hash(hash_pos);
-          --minetest.log("warning", "Decode hash: "..dump(grow_on_pos))
-          -- condition is relevant only for relevant grow_on by the position of supporter and eheck_pos
-          if (    ((supporter_pos.x+grow_on_pos.x)==check_pos.x)
-              and ((supporter_pos.y+grow_on_pos.y)==check_pos.y)
-              and ((supporter_pos.z+grow_on_pos.z)==check_pos.z)) then
-            
-            minetest.log("warning", "Get grow positon. Check for collisions.")
-            if (tree_part_def.supporter==true) then
-              -- look for other more supporters prevention
-              local area_min = {x=check_pos.x-1, y=check_pos.y-1, z=check_pos.z-1};
-              local area_max = {x=check_pos.x+1, y=check_pos.y+1, z=check_pos.z+1};
-              local founds = minetest.find_nodes_in_area(area_min, area_max, tree_def.supporters);
-              minetest.log("warning", "Find "..tostring(#founds).." supporters.")
-              if (#founds>1) then
-                -- supporters have to be checked
-                local more_supporters = false;
-                for index, found_pos in pairs(founds) do
-                  -- no check itself
-                  if (  (found_pos.x~=check_pos.x)
-                      or(found_pos.y~=check_pos.y)
-                      or(found_pos.z~=check_pos.z)) then
-                    -- no check main supporter
-                    if (  (found_pos.x~=supporter_pos.x)
-                        or(found_pos.y~=supporter_pos.y)
-                        or(found_pos.z~=supporter_pos.z)) then
-                      found_node = minetest.get_node(found_pos);
-                      found_tree_part_def = tree_def.parts[found_node.name];
-                      
-                      if (    (found_tree_part_def.supporter==true)
-                          and (found_tree_part_def.size>tree_part_def.size)
-                          and ((found_tree_part_def.size-tree_part_def.size)<=tree_part_def.size_diff)) then
-                        -- more supporters
-                        more_supporters = true;
-                        break;
+          minetest.log("warning", "Decode hash: "..dump(grow_on_pos))
+          if (  (grow_on_pos.x~=0) or (grow_on_pos.y~=0) or (grow_on_pos.z~=0) ) then
+            -- minetest.log("warning", "Decode hash: "..dump(grow_on_pos))
+            -- condition is relevant only for relevant grow_on by the position of supporter and eheck_pos
+            if (    ((supporter_pos.x+grow_on_pos.x)==check_pos.x)
+                and ((supporter_pos.y+grow_on_pos.y)==check_pos.y)
+                and ((supporter_pos.z+grow_on_pos.z)==check_pos.z)) then
+              
+              minetest.log("warning", "Get grow positon. Check for collisions.")
+              if (tree_part_def.supporter==true) then
+                -- look for other more supporters prevention
+                local area_min = {x=check_pos.x-1, y=check_pos.y-1, z=check_pos.z-1};
+                local area_max = {x=check_pos.x+1, y=check_pos.y+1, z=check_pos.z+1};
+                local founds = minetest.find_nodes_in_area(area_min, area_max, tree_def.supporters);
+                minetest.log("warning", "Find "..tostring(#founds).." supporters.")
+                if (#founds>1) then
+                  -- supporters have to be checked
+                  local more_supporters = false;
+                  for index, found_pos in pairs(founds) do
+                    -- no check itself
+                    if (  (found_pos.x~=check_pos.x)
+                        or(found_pos.y~=check_pos.y)
+                        or(found_pos.z~=check_pos.z)) then
+                      -- no check main supporter
+                      if (  (found_pos.x~=supporter_pos.x)
+                          or(found_pos.y~=supporter_pos.y)
+                          or(found_pos.z~=supporter_pos.z)) then
+                        found_node = minetest.get_node(found_pos);
+                        found_tree_part_def = tree_def.parts[found_node.name];
+                        
+                        if (    (found_tree_part_def.supporter==true)
+                            and (found_tree_part_def.size>tree_part_def.size)
+                            and ((found_tree_part_def.size-tree_part_def.size)<=tree_part_def.size_diff)) then
+                          -- more supporters
+                          more_supporters = true;
+                          break;
+                        end
                       end
                     end
                   end
-                end
-                if (more_supporters==true) then
-                  minetest.log("warning", "more_supporters");
-                  break;
+                  if (more_supporters==true) then
+                    minetest.log("warning", "more_supporters");
+                    break;
+                  end
                 end
               end
+              
+              local grow_cost = grow_data.grow_cost * (tree_part_def.size-check_pos_part_size);
+              
+              minetest.log("warning", "Grow_cost: "..tostring(grow_cost))
+              if (grow_cost<=max_grow_cost) then
+                local grow_variant = {cost_points = grow_cost, chance_points=grow_data.grow_chance, target_node = tree_part_node_name, pos = table.copy(check_pos)};
+                table.insert(grow_variants, grow_variant);
+                minetest.log("warning", "Add grow variant: "..dump(grow_variant));
+              end
+              break;
             end
-            
-            local grow_cost = grow_data.grow_cost * (tree_part_def.size-check_pos_part_size);
-            
-            minetest.log("warning", "Grow_cost: "..tostring(grow_cost))
-            if (grow_cost<=max_grow_cost) then
-              local grow_variant = {cost_points = grow_cost, chance_points=grow_data.grow_chance, target_node = tree_part_node_name, pos = table.copy(check_pos)};
-              table.insert(grow_variants, grow_variant);
-              minetest.log("warning", "Add grow variant: "..dump(grow_variant));
+          end
+        end
+      end
+    end
+  end
+  
+  return grow_variants;
+end
+
+function vegetation.tree_part_check_grow_from(grow_variants, tree_def, supporter_pos, supporter_def, max_grow_cost)
+  minetest.log("warning", "Check grow from of node:"..dump(supporter_pos));
+  minetest.log("warning", "Supporter def:"..dump(supporter_def));
+  for tree_part_node_name, tree_part_def in pairs(tree_def.parts) do
+    if (tree_part_def.grow_from~=nil) then
+      if (supporter_def.size<tree_part_def.size) then
+        if (tree_part_def.stump==supporter_def.stump) then
+          minetest.log("warning", "Tree part "..tree_part_node_name.." def:"..dump(tree_part_def));
+          if (tree_part_def.supporter==true) then
+            -- look for other more supporters prevention
+            local area_min = {x=supporter_pos.x-1, y=supporter_pos.y-1, z=supporter_pos.z-1};
+            local area_max = {x=supporter_pos.x+1, y=supporter_pos.y+1, z=supporter_pos.z+1};
+            local founds = minetest.find_nodes_in_area(area_min, area_max, tree_def.supporters);
+            minetest.log("warning", "Find "..tostring(#founds).." supporters.")
+            if (#founds>1) then
+              -- supporters have to be checked
+              local more_supporters = false;
+              for index, found_pos in pairs(founds) do
+                -- no check itself/main supporter
+                if (  (found_pos.x~=supporter_pos.x)
+                    or(found_pos.y~=supporter_pos.y)
+                    or(found_pos.z~=supporter_pos.z)) then
+                  found_node = minetest.get_node(found_pos);
+                  found_tree_part_def = tree_def.parts[found_node.name];
+                  
+                  if (    (found_tree_part_def.supporter==true)
+                      and (found_tree_part_def.size>tree_part_def.size)
+                      and ((found_tree_part_def.size-tree_part_def.size)<=tree_part_def.size_diff)) then
+                    -- more supporters
+                    more_supporters = true;
+                    break;
+                  end
+                end
+              end
+              if (more_supporters==true) then
+                minetest.log("warning", "more_supporters");
+                -- break;
+              end
             end
-            break;
+          end
+              
+          local grow_data = tree_part_def.grow_from;
+          local grow_cost = grow_data.grow_cost * (tree_part_def.size-supporter_def.size);
+          
+          minetest.log("warning", "Grow_cost: "..tostring(grow_cost))
+          if (grow_cost<=max_grow_cost) then
+            local grow_variant = {cost_points = grow_cost, chance_points=grow_data.grow_chance, target_node = tree_part_node_name, pos = table.copy(supporter_pos)};
+            table.insert(grow_variants, grow_variant);
+            minetest.log("warning", "Add grow variant: "..dump(grow_variant));
           end
         end
       end

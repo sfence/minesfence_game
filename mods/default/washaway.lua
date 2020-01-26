@@ -35,7 +35,7 @@ local function flowing_water_washaways_risk(pos, node)
     if (water_flowing>0) then
       flow_level = minetest.get_node_level(check_pos);
       flow_max_level = minetest.get_node_max_level(check_pos);
-      minetest.log("warning", "Level: "..tostring(flow_level).." Max level: "..tostring(flow_max_level).." param2: "..tostring(check_node.param2))
+      -- minetest.log("warning", "Level: "..tostring(flow_level).." Max level: "..tostring(flow_max_level).." param2: "..tostring(check_node.param2))
       
       flow_power = flow_level/flow_max_level;
       
@@ -152,7 +152,7 @@ local function flowing_water_washaway_sediment(pos, node)
             -- add to table
             check_pos.y = check_pos.y + 1;
             
-            minetest.log("warning","Flow_target node: "..check_node.name.." pos: "..dump(check_pos))
+            -- minetest.log("warning","Flow_target node: "..check_node.name.." pos: "..dump(check_pos))
             table.insert(flow_chances, {pos=table.copy(check_pos),power=flow_power,sediment=false});
           end
         end
@@ -174,7 +174,7 @@ local function flowing_water_washaway_sediment(pos, node)
       end
     end
     -- look to table
-    minetest.log("warning","Flow_chances: "..dump(flow_chances))
+    -- minetest.log("warning","Flow_chances: "..dump(flow_chances))
     
     if (#flow_chances==0) then
       return nil;
@@ -202,18 +202,18 @@ function default.washaway_node(pos, node)
   --minetest.log("warning","Washaway_power: "..tostring(washaway_power).." risk: "..tostring(washaway_risk).." list: "..dump(washaways));
   washaway_chance = default.shared_add_chance_power_no_happen(washaway_risk, washaway_power);
   
-  minetest.log("warning", "Wash away node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(washaway_chance).." washaways: "..tostring(#washaways));
+  -- minetest.log("warning", "Wash away node "..node.name.." pos X:"..tostring(pos.x).." Y:"..tostring(pos.y).." Z:"..tostring(pos.z).." chance: "..tostring(washaway_chance).." washaways: "..tostring(#washaways));
   
   local chance = default.random_generator:next(0, 16777215)/16777215.0;
   
   if (chance<=washaway_chance) then
     -- select wash away from table
     local washaway_data = default.shared_random_from_table(washaways, "power");
-    minetest.log("warning","Washaway: "..dump(washaway_data));
+    -- minetest.log("warning","Washaway: "..dump(washaway_data));
     
     local sediment_pos = flowing_water_washaway_sediment(washaway_data.pos);
     
-    minetest.log("warning","Sediment: "..dump(sediment_pos));
+    -- minetest.log("warning","Sediment: "..dump(sediment_pos));
     
     if (sediment_pos~=nil) then
       minetest.set_node(sediment_pos, node);
@@ -224,15 +224,44 @@ function default.washaway_node(pos, node)
   end
 end
 
-if (false) then
+function default.washaway_node_force(pos, node)
+  local washaways = flowing_water_washaways_risk(pos, node);
+  
+  if (#washaways>0) then
+    -- select wash away from table
+    local washaway_data = default.shared_random_from_table(washaways, "power");
+    --minetest.log("warning","Washaway force: "..dump(washaway_data));
+    
+    local sediment_pos = flowing_water_washaway_sediment(washaway_data.pos);
+    
+    --minetest.log("warning","Sediment: "..dump(sediment_pos));
+    
+    if (sediment_pos~=nil) then
+      minetest.set_node(sediment_pos, node);
+      minetest.remove_node(pos);
+      minetest.check_for_falling(pos);
+    end
+  end
+end
+
+if (true) then
   minetest.register_abm({
     label = "Wash away by water",
     nodenames = {"group:washaway"},
     neighbors = {"group:water_flowing"},
-    interval = 12,
-    chance = 5,
+    interval = 393,
+    chance = 100,
     catch_up = false,
     action = default.washaway_node,
+  })
+  minetest.register_abm({
+    label = "Wash away water source by water",
+    nodenames = {"default:fresh_water_source", "default:salt_water_source"},
+    neighbors = {"group:water_flowing"},
+    interval = 129,
+    chance = 50,
+    catch_up = false,
+    action = default.washaway_node_force,
   })
 end
 

@@ -4,11 +4,11 @@ local S = stone_age.S
 -- stone age tools
 
 --
--- ship tool
+-- chip tool
 -- 
 
-minetest.register_tool("stone_age:ship_stone_hard", {
-	description = S("Hard ship stone"),
+minetest.register_tool("stone_age:chip_stone_hard", {
+	description = S("Hard chip stone"),
 	inventory_image = "default_stone_hard.png",
 	tool_capabilities = {
 		full_punch_interval = 1.7,
@@ -20,13 +20,13 @@ minetest.register_tool("stone_age:ship_stone_hard", {
 		damage_groups = {fleshy=1},
 	},
 	sound = {breaks = "default_tool_breaks"},
-	groups = {ship_stone = 1, disable_repair = 1, 
+	groups = {chip_stone = 1, disable_repair = 1, 
             rough_chip_tool = 2, rough_chip_tool_uses = 50,
             rough_chip_tool_maxlevel = 2},
 })
 
-minetest.register_tool("stone_age:ship_stone_soft", {
-	description = S("Soft ship stone"),
+minetest.register_tool("stone_age:chip_stone_soft", {
+	description = S("Soft chip stone"),
 	inventory_image = "default_stone_soft.png",
 	tool_capabilities = {
 		full_punch_interval = 1.7,
@@ -37,7 +37,7 @@ minetest.register_tool("stone_age:ship_stone_soft", {
 		damage_groups = {fleshy=1},
 	},
 	sound = {breaks = "default_tool_breaks"},
-	groups = {ship_stone = 1, disable_repair = 1,
+	groups = {chip_stone = 1, disable_repair = 1,
             rough_chip_tool = 1, rough_chip_tool_uses = 30,
             rough_chip_tool_maxlevel = 1}
 })

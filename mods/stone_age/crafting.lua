@@ -4,13 +4,13 @@ local S = stone_age.S
 -- craft recipes
 
 minetest.register_craft({
-  output = "stone_age:ship_stone_hard",
+  output = "stone_age:chip_stone_hard",
   recipe = {
     {"default:stone_hard"},
   },
 })
 minetest.register_craft({
-  output = "stone_age:ship_stone_soft",
+  output = "stone_age:chip_stone_soft",
   recipe = {
     {"default:stone_soft"},
   },

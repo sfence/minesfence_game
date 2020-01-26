@@ -106,3 +106,4 @@ minetest.register_node("test:formspec", {
 			meta:set_string("formspec", test_formspec2)
     end,
 });
+

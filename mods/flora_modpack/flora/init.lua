@@ -12,7 +12,7 @@ end
 -- Load files
 local flora_path = minetest.get_modpath("flora")
 
-if (false) then
+if (true) then
   -- abm function
   minetest.register_abm({
     label = "Flora growing",
