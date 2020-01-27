@@ -1,0 +1,3 @@
+[submodule "mods/dynamic_liquid"]
+	path = mods/dynamic_liquid
+	url = https://github.com/sfence/dynamic_liquid.git
