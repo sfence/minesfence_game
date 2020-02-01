@@ -11,6 +11,10 @@ local item = {
 		if itemdef and itemdef.groups.flammable ~= 0 then
 			self.flammable = itemdef.groups.flammable
 		end
+    self.build_on_stop = false;
+    if (minetest.registered_nodes[stack:get_name()]~=nil) then
+      self.build_on_stop = true;
+    end
 	end,
 
 	burn_up = function(self)
@@ -38,8 +42,25 @@ local item = {
 			texture = "default_item_smoke.png"
 		})
 	end,
+  
+  build_itself = function(self)
+		local pos = self.object:get_pos()
+    
+    local node = minetest.get_node(pos);
+    if (node.name=="air") or (node.name=="ignore") or (minetest.registered_nodes[node.name].buildable_to==true) then
+		  local stack = ItemStack(self.itemstring)
+		  self.object:remove()
+      --minetest.log("warning", "Pos: "..dump(pos).." stack: "..dump(stack:to_string()))
+      minetest.set_node(pos, {name=stack:get_name()});
+      stack:take_item(1);
+      if (stack:get_count()>0) then
+        minetest.add_item(pos, stack);
+      end
+    end
+  end,
 
 	on_step = function(self, dtime)
+    -- minetest.log("warning", "Selt item step: "..dump(self))
 		builtin_item.on_step(self, dtime)
 
 		if self.flammable then
@@ -66,6 +87,9 @@ local item = {
 				end
 			end
 		end
+    if (self.build_on_stop==true) and (self.moving_state==false) then
+      self:build_itself()
+    end
 	end,
 }
 
