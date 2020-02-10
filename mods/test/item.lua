@@ -5,7 +5,7 @@ local S = test.S;
 --
 --
 
-minetest.register_node("test:test_lua_call", {
+minetest.register_item("test:test_lua_call", {
 	description = S("Test lua call"),
 	tiles = {"default_stick.png"},
 	groups = {oddly_breakable_by_hand = 1},
