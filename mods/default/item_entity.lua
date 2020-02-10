@@ -1,5 +1,47 @@
 -- mods/default/item_entity.lua
 
+local function item_move_pos(pos)
+  local check_pos = table.copy(pos);
+  local table_pos = {};
+  check_pos.x = pos.x - 1;
+  if (default.shared_is_buildable_to(check_pos)==true) then
+    table.insert(table_pos, table.copy(check_pos));
+  end
+  check_pos.x = pos.x + 1;
+  if (default.shared_is_buildable_to(check_pos)==true) then
+    table.insert(table_pos, table.copy(check_pos));
+  end
+  check_pos.x = pos.x;
+  check_pos.z = pos.z - 1;
+  if (default.shared_is_buildable_to(check_pos)==true) then
+    table.insert(table_pos, table.copy(check_pos));
+  end
+  check_pos.z = pos.z + 1;
+  if (default.shared_is_buildable_to(check_pos)==true) then
+    table.insert(table_pos, table.copy(check_pos));
+  end
+  check_pos.z = pos.z;
+  check_pos.y = pos.y + 1;
+  if (default.shared_is_buildable_to(check_pos)==true) then
+    table.insert(table_pos, table.copy(check_pos));
+  end
+  if (#table_pos>0) then
+    local new_index = default.random_generator:next(1, #table_pos);
+    check_pos = table_pos[new_index];
+    --minetest.log("warning", ""..dump(table_pos).." index: "..dump(new_index))
+  else
+    check_pos.y = pos.y + 1;
+    while (default.shared_is_buildable_to(check_pos)==true)
+    do
+      check_pos.y = check_pos.y + 1;
+    end
+  end
+  check_pos.x = check_pos.x - 0.5;
+  check_pos.y = check_pos.y - 0.5;
+  check_pos.z = check_pos.z - 0.5;
+  return check_pos;
+end
+
 local builtin_item = minetest.registered_entities["__builtin:item"]
 
 local item = {
@@ -13,7 +55,9 @@ local item = {
 		end
     self.build_on_stop = false;
     if (minetest.registered_nodes[stack:get_name()]~=nil) then
-      self.build_on_stop = true;
+      if (itemdef.paramtype2 ~= "wallmounted") then
+        self.build_on_stop = true;
+      end
     end
 	end,
 
@@ -45,6 +89,9 @@ local item = {
   
   build_itself = function(self)
 		local pos = self.object:get_pos()
+    pos.x = pos.x + 0.5;
+    pos.y = pos.y + 0.5;
+    pos.z = pos.z + 0.5;
     
     local node = minetest.get_node(pos);
     if (node.name=="air") or (node.name=="ignore") or (minetest.registered_nodes[node.name].buildable_to==true) then
@@ -54,8 +101,10 @@ local item = {
       minetest.set_node(pos, {name=stack:get_name()});
       stack:take_item(1);
       if (stack:get_count()>0) then
-        minetest.add_item(pos, stack);
+        minetest.add_item(item_move_pos(pos), stack);
       end
+    else
+      self.object:set_pos(item_move_pos(pos));
     end
   end,
 
