@@ -119,8 +119,8 @@ minetest.register_node("tree_pine:stump_1_4_with_needles",{
 	description = S("Pine srunk with Needles"),
 	drawtype = "nodebox",
 	tiles = {"tree_pine_needles.png^tree_pine_trunk_top_1_4.png", "tree_pine_needles.png^tree_pine_trunk_top_1_4.png",
-		"tree_pine_needles.png"},
-	waving = 1,
+		"tree_pine_trunk_1_4.png^tree_pine_needles.png"},
+	waving = 0,
 	paramtype = "light",
 	paramtype2 = "facedir",
 	is_ground_content = false,
@@ -140,8 +140,8 @@ minetest.register_node("tree_pine:stump_1_8_with_needles",{
 	description = S("Pine srunk with Needles"),
 	drawtype = "nodebox",
 	tiles = {"tree_pine_needles.png^tree_pine_trunk_top_1_8.png", "tree_pine_needles.png^tree_pine_trunk_top_1_8.png",
-		"tree_pine_needles.png"},
-	waving = 1,
+		"tree_pine_trunk_1_8.png^tree_pine_needles.png"},
+	waving = 0,
 	paramtype = "light",
 	paramtype2 = "facedir",
 	is_ground_content = false,
@@ -162,8 +162,8 @@ minetest.register_node("tree_pine:trunk_1_4_with_needles",{
 	description = S("Pine trunk with Needles"),
 	drawtype = "nodebox",
 	tiles = {"tree_pine_needles.png^tree_pine_trunk_top_1_4.png", "tree_pine_needles.png^tree_pine_trunk_top_1_4.png",
-		"tree_pine_needles.png"},
-	waving = 1,
+		"tree_pine_trunk_1_4.png^tree_pine_needles.png"},
+	waving = 0,
 	paramtype = "light",
 	paramtype2 = "facedir",
 	is_ground_content = false,
@@ -183,8 +183,8 @@ minetest.register_node("tree_pine:trunk_1_8_with_needles",{
 	description = S("Pine trunk with Needles"),
 	drawtype = "nodebox",
 	tiles = {"tree_pine_needles.png^tree_pine_trunk_top_1_8.png", "tree_pine_needles.png^tree_pine_trunk_top_1_8.png",
-		"tree_pine_needles.png"},
-	waving = 1,
+		"tree_pine_trunk_1_8.png^tree_pine_needles.png"},
+	waving = 0,
 	paramtype = "light",
 	paramtype2 = "facedir",
 	is_ground_content = false,
@@ -305,6 +305,7 @@ local tree_part_def = {
     size_diff = 1,
     grow_points = 0,
     supporter = true,
+    check_supporters = 1,
     stump = true,
     
     grow_on = {},
@@ -316,7 +317,7 @@ local tree_part_def = {
 tree_part_def.grow_points = 0;
 tree_part_def.grow_on = {};
 tree_part_def.grow_from = {
-    grow_cost = 10,
+    grow_cost = 288,
     grow_chance = 1,
   };
 tree_part_def.stump = true;
@@ -324,7 +325,7 @@ vegetation.register_tree_part("Pine tree", "tree_pine:stump_1_1", table.copy(tre
 tree_part_def.grow_points = 0;
 local pos_hash = minetest.hash_node_position({x=0,y=1,z=0});
 tree_part_def.grow_on[pos_hash] = {
-    grow_cost = 14,
+    grow_cost = 192,
     grow_chance = 10,
   };
 tree_part_def.stump = false;
@@ -333,7 +334,7 @@ tree_part_def.size = 9;
 tree_part_def.grow_points = 0;
 tree_part_def.grow_on = {};
 tree_part_def.grow_from = {
-    grow_cost = 8,
+    grow_cost = 144,
     grow_chance = 2,
   };
 tree_part_def.stump = true;
@@ -341,8 +342,8 @@ vegetation.register_tree_part("Pine tree", "tree_pine:stump_1_4", table.copy(tre
 tree_part_def.grow_points = 0;
 local pos_hash = minetest.hash_node_position({x=0,y=1,z=0});
 tree_part_def.grow_on[pos_hash] = {
-    grow_cost = 13,
-    grow_chance = 10,
+    grow_cost = 96,
+    grow_chance = 12,
   };
 tree_part_def.stump = false;
 vegetation.register_tree_part("Pine tree", "tree_pine:trunk_1_4", table.copy(tree_part_def))
@@ -350,7 +351,7 @@ tree_part_def.size = 8;
 tree_part_def.grow_points = 0;
 tree_part_def.grow_on = {};
 tree_part_def.grow_from = {
-    grow_cost = 6,
+    grow_cost = 36,
     grow_chance = 3,
   };
 tree_part_def.stump = true;
@@ -358,7 +359,7 @@ vegetation.register_tree_part("Pine tree", "tree_pine:stump_1_8", table.copy(tre
 tree_part_def.grow_points = 0;
 local pos_hash = minetest.hash_node_position({x=0,y=1,z=0});
 tree_part_def.grow_on[pos_hash] = {
-    grow_cost = 11,
+    grow_cost = 24,
     grow_chance = 1,
   };
 tree_part_def.stump = false;
@@ -367,7 +368,7 @@ tree_part_def.size = 8;
 tree_part_def.grow_points = 12;
 tree_part_def.grow_on = {};
 tree_part_def.grow_from = {
-    grow_cost = 9,
+    grow_cost = 72,
     grow_chance = 4,
   };
 tree_part_def.stump = true;
@@ -375,7 +376,7 @@ vegetation.register_tree_part("Pine tree", "tree_pine:stump_1_4_with_needles", t
 tree_part_def.grow_points = 2;
 local pos_hash = minetest.hash_node_position({x=0,y=1,z=0});
 tree_part_def.grow_on[pos_hash] = {
-    grow_cost = 1,
+    grow_cost = 48,
     grow_chance = 20,
   };
 tree_part_def.stump = false;
@@ -384,15 +385,15 @@ tree_part_def.size = 7;
 tree_part_def.grow_points = 13;
 tree_part_def.grow_on = {};
 tree_part_def.grow_from = {
-    grow_cost = 7,
-    grow_chance = 5,
+    grow_cost = 18,
+    grow_chance = 1,
   };
 tree_part_def.stump = true;
 vegetation.register_tree_part("Pine tree", "tree_pine:stump_1_8_with_needles", table.copy(tree_part_def))
 tree_part_def.grow_points = 3;
 local pos_hash = minetest.hash_node_position({x=0,y=1,z=0});
 tree_part_def.grow_on[pos_hash] = {
-    grow_cost = 13,
+    grow_cost = 12,
     grow_chance = 25,
   };
 tree_part_def.stump = false;
@@ -401,6 +402,7 @@ tree_part_def.size = 6;
 tree_part_def.size_diff = 3;
 tree_part_def.grow_points = 2;
 tree_part_def.supporter = false;
+tree_part_def.check_supporters = 0;
 tree_part_def.grow_on = {};
 tree_part_def.grow_from = {};
 local pos_hash = minetest.hash_node_position({x=0,y=1,z=0});
