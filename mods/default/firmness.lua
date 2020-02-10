@@ -186,7 +186,7 @@ function default.check_neighbour_for_fall(pos)
             default.fall_stable_node(check_pos, check_node, true); 
             if (y_diff>0) then
               --minetest.log("warning", "Near refall check of "..check_node.name);
-              minetest.after(1, default.check_neighbour_for_fall, table.copy(check_pos));
+              minetest.after(0.5+default.random_generator:next(0,10)/10.0, default.check_neighbour_for_fall, table.copy(check_pos));
             end
           end
         end
@@ -272,7 +272,7 @@ function default.check_for_cavein(pos)
       default.fall_stable_node(pos, node, false);
       
       for key, recall_pos in pairs(recall_pos) do
-        minetest.after(0.4, default.check_for_cavein, recall_pos);
+        minetest.after(0.2+default.random_generator:next(0,4)/10.0, default.check_for_cavein, recall_pos);
       end
     end
   end 
@@ -448,7 +448,7 @@ function default.firmness_abm_action(pos, node)
   if (fall_it==true) then
     default.fall_stable_node(pos, node, true); 
     --default.firmness_after_destruct(pos, node);
-    --minetest.after(1, default.check_neighbour_for_fall, pos);
+    --minetest.after(0.5+default.random_generator:next(0,10)/10.0, default.check_neighbour_for_fall, pos);
   end
 end
 
@@ -456,14 +456,14 @@ function default.firmness_after_destruct(pos, oldnode)
   minetest.log("warning", "after_destruct X: "..tostring(pos.x).." Y: "..tostring(pos.y).." Z:"..tostring(pos.z));
   default.neighbour_stable_to_normal(pos);
   --default.check_neighbour_for_fall(pos);
-  minetest.after(1, default.check_neighbour_for_fall, pos);
+  minetest.after(0.5+default.random_generator:next(0,10)/10.0, default.check_neighbour_for_fall, pos);
 end
 
 function default.firmness_preserve_metadata(pos, oldnode, oldmeta, drops)
   minetest.log("warning", "preverse_metadata");
   default.neighbour_stable_to_normal(pos);
   --default.check_neighbour_for_fall(pos);
-  minetest.after(1, default.check_neighbour_for_fall, pos);
+  minetest.after(0.5+default.random_generator:next(0,10)/10.0, default.check_neighbour_for_fall, pos);
 end
 
 -- settings should include firmness, resilience, names
@@ -514,12 +514,12 @@ function default.register_node_with_firmness(node_def, settings)
   end
 end
 
-if (false) then
+if (true) then
   minetest.register_abm({
     label = "Check Firmness",
     nodenames = {"group:firmness"},
     neighbors = {"group:air","group:water","air"},
-    interval = 20,
+    interval = 559,
     chance = 6,
     catch_up = false,
     action = default.firmness_abm_action,
