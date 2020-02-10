@@ -239,6 +239,15 @@ local function grow_sapling(...)
 	return default.grow_sapling(...)
 end
 
+-- Required wrapper to allow customization of default.liquid_after_destruct
+local function liquid_after_destruct(...)
+	return default.liquid_after_destruct(...)
+end
+
+function default.liquid_after_destruct(pos, oldnode)
+  return
+end
+
 --
 -- Stone
 --
@@ -2337,6 +2346,8 @@ minetest.register_node("default:water_source", {
 	post_effect_color = {a = 103, r = 30, g = 60, b = 90},
 	groups = {water = 3, liquid = 3, salt_water = 1, cools_lava = 1},
 	sounds = default.node_sound_water_defaults(),
+  
+  after_destruct = liquid_after_destruct,
 })
 
 minetest.register_node("default:water_flowing", {
@@ -2436,6 +2447,8 @@ minetest.register_node("default:river_water_source", {
 	post_effect_color = {a = 103, r = 30, g = 76, b = 90},
 	groups = {water = 3, liquid = 3, cools_lava = 1},
 	sounds = default.node_sound_water_defaults(),
+  
+  after_destruct = liquid_after_destruct,
 })
 
 minetest.register_node("default:river_water_flowing", {
@@ -2573,6 +2586,8 @@ minetest.register_node("default:lava_source", {
 	damage_per_second = 4 * 2,
 	post_effect_color = {a = 191, r = 255, g = 64, b = 0},
 	groups = {lava = 3, liquid = 2, igniter = 1},
+  
+  after_destruct = liquid_after_destruct,
 })
 
 minetest.register_node("default:lava_flowing", {
