@@ -100,7 +100,7 @@ function default.wet_create_spring(pos, node)
   
   if (chance<=desiccation_chance) then
     minetest.set_node(pos, {name="default:fresh_water_flowing"});
-    local leveled = minetest.get_node_max_level(pos);
+    local leveled = minetest.get_node_max_level(pos)+1;
     local create_level = math.floor(chance/(desiccation_chance/(10*leveled+1)));
     --minetest.log("warning", "Level: "..tostring(create_level).." Max level: "..tostring(leveled))
     if (create_level>0) then
@@ -124,7 +124,7 @@ function default.wet_dry_spring(pos, node)
   local leveled = minetest.get_node_max_level(pos);
   minetest.set_node_level(pos, leveled);
   if (leveled<7) then 
-    minetest.log("error","Flwint water set leveled problem.")
+    minetest.log("error","Flowing water set leveled problem.")
   end
 end
 

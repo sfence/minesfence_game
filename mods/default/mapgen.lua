@@ -2520,3 +2520,4 @@ else
 	default.register_ores()
 	default.register_decorations()
 end
+
