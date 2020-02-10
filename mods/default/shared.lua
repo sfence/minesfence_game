@@ -215,3 +215,25 @@ function default.shared_random_from_table(table_data, points_field_name)
   return nil;
 end
 
+function default.shared_is_buildable_to(pos)
+  --minetest.log("warning", "is buildable: "..dump(pos))
+  local node = minetest.get_node(pos);
+  if (node==nil) then
+    return false;
+  end
+  if ((node.name=="air") or (node.name=="ignore")) then
+    return true;
+  end
+  local node_def = minetest.registered_nodes[node.name];
+  if (node_def==nil) then
+    return false;
+  end
+  --minetest.log("warning", "is buildable: "..dump(node_def.buildable_to))
+  
+  return node_def.buildable_to;
+end
+
+function default.shared_log_position(pos)
+  return "[ X: "..pos.x.."; Z: "..pos.z.."; Y: "..pos.y..";]";
+end
+
