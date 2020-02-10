@@ -86,7 +86,7 @@ end
   
 default.register_changeable_node_change("default:water_flowing", "flowing_to_source", {new_node_name="default:water_source",check_stability=false});
 
-if (true) then
+if (false) then
   minetest.register_abm({
     label = "Water flowing to source",
     nodenames = {"group:water_flowing"},
