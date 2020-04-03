@@ -1,0 +1,38 @@
+PLAN for stone age
+
+Tools
+  Chip tools
+    stone_age:chip_stone_hard - stone for chipping another stone
+    stone_age:chip_stone_soft - stone for chipping another stone
+  
+  Scrapers
+    stone_age:scraper_flint - hand axe from flint
+    stone_age:scraper_soft_stone - hand axe from soft stone
+
+  Axes
+    stone_age:hand_axe_flint - hand axe from flint
+    stone_age:hand_axe_soft_stone - hand axe from soft stone
+  
+  Shovels
+    stone_age:shovel_wood - wooden shovel
+
+  Spikes
+    stone_age:spike_soft_stone_medium
+    stone_age:spike_flint_medium
+    stone_age:spike_flint_precise
+  
+  Saws
+    stone_age:saw_small_flint - saw from flints
+
+  Sickles
+    stone_age:sickle_flint
+
+  Bowls
+    stone_age:bowl_wood
+
+  Make fire tools
+
+  Hand Weapons
+    stone_age:lance_wood - wooden lance
+  
+  Shot Weapons

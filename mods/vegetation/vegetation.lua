@@ -26,7 +26,8 @@ end
 -- 
 -- vegetation probability function
 --
--- max_probability*abs(1/(1+lower_steepness^(-x+lower_border))    + 1/(1+upper_steepness^(x-upper_border)) - 1)
+-- max_probability*abs(1/(1+lower_steepness^(-x+lower_border))
+--  + 1/(1+upper_steepness^(x-upper_border)) - 1)
 -- 
 -- probabality in lower_border and upper_border is 0.5, 
 -- between lower_border and upper_border probability increase to 1, 

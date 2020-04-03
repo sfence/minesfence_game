@@ -1,3 +1,15 @@
 [submodule "mods/dynamic_liquid"]
 	path = mods/dynamic_liquid
 	url = https://github.com/sfence/dynamic_liquid.git
+[submodule "mods/tempsurvive"]
+	path = mods/tempsurvive
+	url = https://github.com/sfence/tempsurvive.git
+[submodule "mods/lightning"]
+	path = mods/lightning
+	url = https://github.com/sfence/lightning.git
+[submodule "mods/mymonths"]
+	path = mods/mymonths
+	url = https://github.com/sfence/mymonths.git
+[submodule "mods/weather_with_wind"]
+	path = mods/weather_with_wind
+	url = https://github.com/sfence/weather_with_wind

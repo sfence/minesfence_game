@@ -65,7 +65,7 @@ function default.register_changeable_node_change(node_name, change_name, change_
 end
 
 -- do node change with change_name
-function default.apply_node_change(pos, node, change_name)
+function default.apply_node_change(pos, node, change_name, change_power)
   if (node==nil) then
     node = minetest.get_node(pos);
   end
@@ -79,7 +79,7 @@ function default.apply_node_change(pos, node, change_name)
     local change_def = changeable_node.changes[change_name];
     --minetest.log("warning","change_def: "..dump(change_def))
     if (change_def~=nil) then
-      if ((change_def.allow_change==nil) or (change_def.allow_change(pos, node)==true)) then
+      if ((change_def.allow_change==nil) or (change_def.allow_change(pos, node, change_power)==true)) then
         --minetest.log("warning", "Change "..node.name.." to "..change_def.new_node_name..".")
         minetest.swap_node(pos, {name=change_def.new_node_name});
         if (change_def.check_stability==true) then

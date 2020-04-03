@@ -21,6 +21,7 @@ minetest.register_item(":", {
 	},
   groups = {hand_work = 2, hand_work_uses = 0,
             hand_work_maxlevel = 2},
+	liquids_pointable = true,
 })
 
 --

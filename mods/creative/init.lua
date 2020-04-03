@@ -67,6 +67,7 @@ if creative_mode_cache then
 			damage_groups = {fleshy = 10},
 		},
     groups = {hand_work = 2, hand_work_uses = 0, hand_work_maxlevel = 2},
+	  liquids_pointable = true,
 	})
 end
 
